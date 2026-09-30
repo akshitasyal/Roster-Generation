@@ -31,6 +31,8 @@ import com.wfm.shift.repository.ShiftRepository;
 import com.wfm.shift.repository.ShiftIntervalCoverageRepository;
 import com.wfm.skill.entity.EmployeeSkill;
 import com.wfm.skill.repository.EmployeeSkillRepository;
+import com.wfm.skill.entity.SkillLevel;
+import com.wfm.skill.repository.SkillLevelRepository;
 import com.wfm.availability.entity.Availability;
 import com.wfm.availability.repository.AvailabilityRepository;
 import com.wfm.leave.entity.Leave;
@@ -76,6 +78,7 @@ public class PlanningSnapshotBuilder {
     private final ProjectHolidayPolicyRepository projectHolidayRepo;
     private final ManagementCoverageRequirementRepository mgmtCoverageRepo;
     private final EmployeeOrgAssignmentRepository orgRepo;
+    private final SkillLevelRepository skillLevelRepo;
 
     @Transactional(readOnly = true)
     public PlanningSnapshot buildSnapshot(Long cycleId) {
@@ -90,20 +93,12 @@ public class PlanningSnapshotBuilder {
 
         // 2 & 3. Load configurations
         WorkingHoursPolicy policy = hoursService.getActivePolicy(projectId, startDate);
-        int minRest = ruleService.getMinRestHours(projectId, startDate);
-        int maxWorkingHours = ruleService.getMaxWorkingHours(projectId, startDate);
-        int weeklyOffCount = ruleService.getWeeklyOffCount(projectId, startDate);
-        int maxConsecutive = ruleService.getMaxConsecutiveDays(projectId, startDate);
-        boolean leaveCountsAsOff = ruleService.isLeaveCountsAsOff(projectId, startDate);
-        String wfmMode = ruleService.getWfmSchedulingMode(projectId, startDate);
-        String tieBreak = ruleService.getTieBreakStrategy(projectId, startDate);
-
         PlanningSnapshot.SchedulingRules rules = PlanningSnapshot.SchedulingRules.builder()
-                .minRestHours(minRest)
-                .weeklyOffCount(weeklyOffCount)
-                .maxConsecutiveDays(maxConsecutive)
-                .leaveCountsAsOff(leaveCountsAsOff)
-                .wfmSchedulingMode(wfmMode)
+                .minRestHours(ruleService.getMinRestHours(projectId, startDate))
+                .weeklyOffCount(ruleService.getWeeklyOffCount(projectId, startDate))
+                .maxConsecutiveDays(ruleService.getMaxConsecutiveDays(projectId, startDate))
+                .leaveCountsAsOff(ruleService.isLeaveCountsAsOff(projectId, startDate))
+                .wfmSchedulingMode(ruleService.getWfmSchedulingMode(projectId, startDate))
                 .build();
 
         PlanningSnapshot.WorkingHoursPolicySnapshot hoursPolicy = PlanningSnapshot.WorkingHoursPolicySnapshot.builder()
@@ -114,10 +109,17 @@ public class PlanningSnapshotBuilder {
 
         Set<DayOfWeek> weekendDays = Arrays.stream(ruleService.getValue("WEEKEND_DAYS", projectId, startDate).split(","))
                 .map(String::trim).map(DayOfWeek::valueOf).collect(Collectors.toSet());
+        String tieBreak = ruleService.getTieBreakStrategy(projectId, startDate);
 
-        // 5. Load employees in project scope
-        // Note: simplified for the stub
-        List<Employee> activeEmployees = employeeRepo.findByProjectId(projectId);
+        // 4. Load Optimization Weights
+        PlanningSnapshot.OptimizationWeights optWeights = new PlanningSnapshot.OptimizationWeights();
+
+        // 5. Load employees via Org Assignments (simplified missing exact JPA method)
+        // A real impl would fetch active assignments in the date range.
+        List<Employee> activeEmployees = employeeRepo.findAll().stream()
+                .filter(e -> "ASSOCIATE".equals(e.getRoleCode()))
+                .collect(Collectors.toList());
+        
         List<PlanningSnapshot.EmployeeSnapshot> employeeSnapshots = activeEmployees.stream()
                 .map(e -> PlanningSnapshot.EmployeeSnapshot.builder()
                         .id(e.getId())
@@ -125,20 +127,93 @@ public class PlanningSnapshotBuilder {
                         .roleCode(e.getRoleCode())
                         .build())
                 .collect(Collectors.toList());
+        List<Long> employeeIds = activeEmployees.stream().map(Employee::getId).collect(Collectors.toList());
 
-        // Fill remaining empty maps for compilation
-        Map<Long, Set<LocalDate>> approvedLeaves = new HashMap<>();
-        Map<Long, Set<LocalDate>> unavailableDates = new HashMap<>();
-        Map<Long, Set<Long>> eligibleShifts = new HashMap<>();
-        Map<Long, Map<Long, Integer>> skillLevels = new HashMap<>();
-        Map<Long, List<PlanningSnapshot.IntervalCoverage>> intervalCoverage = new HashMap<>();
-        Map<Long, String> shiftPatterns = new HashMap<>();
-        Map<LocalDate, PlanningSnapshot.HolidayPolicy> holidayPolicies = new HashMap<>();
-        Map<Long, List<Long>> reportsByManager = new HashMap<>();
+        // 6. Load shifts
+        List<Shift> activeShifts = shiftRepo.findAll();
+        List<PlanningSnapshot.ShiftSnapshot> shiftSnapshots = activeShifts.stream()
+                .map(s -> PlanningSnapshot.ShiftSnapshot.builder()
+                        .id(s.getId())
+                        .shiftCode(s.getShiftCode())
+                        .shiftType(s.getShiftType())
+                        .startHour(s.getStartTime().getHour() + s.getStartTime().getMinute() / 60.0)
+                        .endHour(s.getEndTime().getHour() + s.getEndTime().getMinute() / 60.0 + (s.getEndTime().isBefore(s.getStartTime()) ? 24.0 : 0.0))
+                        .durationHours(s.getDurationHours().doubleValue())
+                        .overnight(s.getEndTime().isBefore(s.getStartTime()))
+                        .build())
+                .collect(Collectors.toList());
+
+        // 7. Load shift interval coverage
+        List<ShiftIntervalCoverage> coverages = intervalRepo.findAll(); // Simplified fallback
+        Map<Long, List<PlanningSnapshot.IntervalCoverage>> shiftIntervalCoverage = coverages.stream()
+                .collect(Collectors.groupingBy(c -> c.getShift().getId(),
+                        Collectors.mapping(c -> PlanningSnapshot.IntervalCoverage.builder()
+                                .start(c.getIntervalStart())
+                                .end(c.getIntervalEnd())
+                                .factor(c.getCoverageFactor().doubleValue())
+                                .build(), Collectors.toList())));
+
+        // 8. Load demand
+        List<Demand> demands = demandRepo.findByPlanningCycleId(cycleId);
+        List<PlanningSnapshot.DemandSnapshot> demandSnapshots = demands.stream()
+                .map(d -> PlanningSnapshot.DemandSnapshot.builder()
+                        .date(d.getDate())
+                        .skillId(d.getSkill().getId())
+                        .skillLevelWeight(d.getSkillLevel() != null ? d.getSkillLevel().getLevelWeight() : 1)
+                        .requiredHeadcount(d.getRequiredHeadcount())
+                        .build())
+                .collect(Collectors.toList());
+
+        // 9-10. Load skills
+        List<EmployeeSkill> empSkills = employeeSkillRepo.findAll(); // Simplified fallback
+        Map<Long, Map<Long, Integer>> skillLevels = empSkills.stream()
+                .filter(es -> employeeIds.contains(es.getEmployee().getId()))
+                .collect(Collectors.groupingBy(es -> es.getEmployee().getId(),
+                        Collectors.toMap(es -> es.getSkill().getId(), es -> es.getSkillLevel() != null ? es.getSkillLevel().getLevelWeight() : 1)));
+
+        // 11. Shift Eligibility
+        List<ShiftEligibility> eligibilities = shiftEligibilityRepo.findAll(); // Simplified fallback
+        Map<Long, Set<Long>> eligibleShifts = eligibilities.stream()
+                .filter(e -> employeeIds.contains(e.getEmployee().getId()))
+                .collect(Collectors.groupingBy(e -> e.getEmployee().getId(),
+                        Collectors.mapping(e -> e.getShift().getId(), Collectors.toSet())));
+
+        // 12. Shift Patterns
+        Map<Long, String> shiftPatterns = new HashMap<>(); // From org assignments in full impl
+
+        // 13. Availability
+        Map<Long, Set<LocalDate>> unavailableDates = availabilityRepo.findAll().stream()
+                .filter(a -> employeeIds.contains(a.getEmployee().getId()) && "UNAVAILABLE".equals(a.getAvailabilityType()))
+                .collect(Collectors.groupingBy(a -> a.getEmployee().getId(),
+                        Collectors.mapping(Availability::getDate, Collectors.toSet())));
+
+        // 14. Leaves
+        Map<Long, Set<LocalDate>> approvedLeaves = leaveRepo.findAll().stream()
+                .filter(l -> employeeIds.contains(l.getEmployee().getId()) && "APPROVED".equals(l.getStatus()))
+                .collect(Collectors.groupingBy(l -> l.getEmployee().getId(),
+                        Collectors.flatMapping(l -> l.getStartDate().datesUntil(l.getEndDate().plusDays(1)), Collectors.toSet())));
+
+        // 15-16. Preferences
+        Map<Long, Long> preferredShift = prefRepo.findAll().stream()
+                .filter(p -> employeeIds.contains(p.getEmployee().getId()) && "APPROVED".equals(p.getStatus()))
+                .collect(Collectors.toMap(p -> p.getEmployee().getId(), p -> p.getPreferredShift().getId(), (v1,v2)->v1));
+        
+        Map<Long, List<String>> preferredOffDays = weeklyOffRepo.findAll().stream()
+                .filter(w -> employeeIds.contains(w.getEmployee().getId()))
+                .collect(Collectors.toMap(w -> w.getEmployee().getId(), w -> Arrays.asList(w.getPreferredDays().split(",")), (v1,v2)->v1));
+
+        // 17-18. Roster History & Locks
         Map<Long, Map<LocalDate, Long>> previousRoster = new HashMap<>();
-        Map<Long, Long> preferredShift = new HashMap<>();
-        Map<Long, List<String>> preferredOffDays = new HashMap<>();
         Map<Long, Map<LocalDate, PlanningSnapshot.LockedAssignment>> lockedAssignments = new HashMap<>();
+
+        // 19. Holidays
+        Map<LocalDate, PlanningSnapshot.HolidayPolicy> holidayPolicies = new HashMap<>();
+
+        // 20. Management Coverage
+        List<PlanningSnapshot.ManagementCoverageRequirementSnapshot> mgmtReqs = new ArrayList<>();
+
+        // 21. Reports By Manager
+        Map<Long, List<Long>> reportsByManager = new HashMap<>();
 
         return PlanningSnapshot.builder()
                 .planningCycleId(cycleId)
@@ -147,13 +222,13 @@ public class PlanningSnapshotBuilder {
                 .endDate(endDate)
                 .planningDates(dates)
                 .employees(employeeSnapshots)
-                .shifts(List.of())
-                .demands(List.of())
+                .shifts(shiftSnapshots)
+                .demands(demandSnapshots)
                 .approvedLeavesByEmployee(approvedLeaves)
                 .unavailableDatesByEmployee(unavailableDates)
                 .eligibleShiftsByEmployee(eligibleShifts)
                 .skillLevelsByEmployee(skillLevels)
-                .shiftIntervalCoverage(intervalCoverage)
+                .shiftIntervalCoverage(shiftIntervalCoverage)
                 .shiftPatternByEmployee(shiftPatterns)
                 .workingHoursPolicy(hoursPolicy)
                 .rules(rules)
@@ -161,12 +236,12 @@ public class PlanningSnapshotBuilder {
                 .holidayPolicies(holidayPolicies)
                 .tieBreakStrategy(tieBreak)
                 .reportsByManager(reportsByManager)
-                .mgmtCoverageRequirements(List.of())
+                .mgmtCoverageRequirements(mgmtReqs)
                 .previousRosterByEmployee(previousRoster)
                 .preferredShiftByEmployee(preferredShift)
                 .preferredOffDaysByEmployee(preferredOffDays)
                 .lockedAssignments(lockedAssignments)
-                .weights(new PlanningSnapshot.OptimizationWeights())
+                .weights(optWeights)
                 .timeLimitSeconds(ruleService.getSolverTimeLimitSeconds(projectId, startDate))
                 .solutionLimit(1)
                 .snapshotVersion("1.0.0")
