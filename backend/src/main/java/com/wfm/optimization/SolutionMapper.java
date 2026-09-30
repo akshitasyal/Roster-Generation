@@ -46,6 +46,25 @@ public class SolutionMapper {
                 }
             }
             solution.setAssignments(assignments);
+
+            // Map shortages
+            java.util.List<RosterSolution.CoverageResult> coverageResults = new java.util.ArrayList<>();
+            if (data.shortages != null && snapshot.getDemands() != null) {
+                for (int i = 0; i < data.shortages.length; i++) {
+                    PlanningSnapshot.DemandSnapshot demand = snapshot.getDemands().get(i);
+                    int shortageValue = (int) solver.value(data.shortages[i]);
+                    
+                    coverageResults.add(RosterSolution.CoverageResult.builder()
+                            .date(demand.getDate())
+                            .skillId(demand.getSkillId())
+                            .requiredHeadcount(demand.getRequiredHeadcount())
+                            .gap(shortageValue)
+                            .assignedHeadcount(demand.getRequiredHeadcount() - shortageValue)
+                            .coverageStatus(shortageValue > 0 ? "SHORTAGE" : "COVERED")
+                            .build());
+                }
+            }
+            solution.setCoverageResults(coverageResults);
         }
         return solution;
     }
