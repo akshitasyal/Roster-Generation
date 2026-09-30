@@ -117,7 +117,7 @@ export default function AssociateDashboard() {
   );
 }
 
-function KpiCard({ title, value, subtitle, icon }: any) {
+function KpiCard({ title, value, subtitle, icon }: { title: string; value: string; subtitle: string; icon: React.ReactNode }) {
   return (
     <div className="glass-card p-5 flex flex-col justify-between">
       <div className="flex items-center justify-between mb-4">
@@ -132,7 +132,7 @@ function KpiCard({ title, value, subtitle, icon }: any) {
   );
 }
 
-function ActionCard({ title, icon, href }: any) {
+function ActionCard({ title, icon, href }: { title: string; icon: string; href: string }) {
   return (
     <Link href={href} className="p-4 rounded-xl bg-wfm-dark border border-wfm-border hover:border-brand-primary hover:bg-wfm-panel transition-all flex flex-col items-center justify-center text-center gap-2 group">
       <span className="text-2xl group-hover:scale-110 transition-transform">{icon}</span>

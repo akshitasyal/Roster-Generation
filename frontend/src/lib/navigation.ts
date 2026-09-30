@@ -1,17 +1,24 @@
-import {
-  LayoutDashboard,
-  CalendarDays,
-  Users,
-  CalendarRange,
-  ClipboardCheck,
-  Building2,
-  BarChart3,
+import { 
+  LayoutDashboard, 
+  Users, 
+  Calendar, 
   Settings,
-  Bell,
+  CalendarRange,
+  BarChart3,
   UserCircle,
   FileCheck2,
   AlertCircle,
-  Briefcase
+  Briefcase,
+  Sparkles,
+  ClipboardList,
+  GitMerge,
+  ShieldCheck,
+  CheckSquare,
+  Network,
+  History,
+  FileSpreadsheet,
+  Bell,
+  Activity
 } from 'lucide-react';
 
 export interface NavItem {
@@ -27,92 +34,142 @@ export interface NavSection {
 }
 
 export const NAVIGATION_CONFIG: NavSection[] = [
+  // ==========================================
+  // WFM ADMINISTRATOR CONFIGURATION
+  // ==========================================
   {
-    title: 'WFM Control Center',
+    title: 'Dashboard',
     roles: ['WFM'],
     items: [
-      { label: 'Dashboard', href: '/wfm/dashboard', icon: LayoutDashboard },
-      { label: 'Planning Cycles', href: '/wfm/planning-cycles', icon: CalendarRange },
-      { label: 'Demand', href: '/wfm/demand', icon: BarChart3 },
-      { label: 'Workforce', href: '/wfm/workforce', icon: Users },
-      { label: 'Generate Roster', href: '/wfm/generate', icon: SparklesIcon },
-      { label: 'Exceptions', href: '/wfm/exceptions', icon: AlertCircle },
-      { label: 'Settings', href: '/wfm/settings', icon: Settings },
-    ],
+      { label: 'Workforce Planning', href: '/wfm/dashboard', icon: LayoutDashboard }
+    ]
   },
   {
-    title: 'Executive',
+    title: 'PLANNING',
+    roles: ['WFM'],
+    items: [
+      { label: 'Planning Cycles', href: '/wfm/cycles', icon: CalendarRange },
+      { label: 'Demand Management', href: '/wfm/demand', icon: BarChart3 },
+      { label: 'Workforce', href: '/wfm/workforce', icon: Users },
+      { label: 'Preferences', href: '/wfm/preferences', icon: ClipboardList }
+    ]
+  },
+  {
+    title: 'ROSTER',
+    roles: ['WFM'],
+    items: [
+      { label: 'Generate Roster', href: '/wfm/generate', icon: Sparkles },
+      { label: 'Roster Versions', href: '/wfm/versions', icon: History },
+      { label: 'Validation', href: '/wfm/validation', icon: ShieldCheck },
+      { label: 'Exceptions', href: '/wfm/exceptions', icon: AlertCircle },
+      { label: 'Adjustments', href: '/wfm/adjustments', icon: GitMerge },
+      { label: 'Published Rosters', href: '/wfm/published', icon: CheckSquare }
+    ]
+  },
+  {
+    title: 'MANAGEMENT',
+    roles: ['WFM'],
+    items: [
+      { label: 'TL Review', href: '/wfm/reviews/tl', icon: FileCheck2 },
+      { label: 'AM Review', href: '/wfm/reviews/am', icon: FileCheck2 },
+      { label: 'Manager Review', href: '/wfm/reviews/manager', icon: FileCheck2 },
+      { label: 'Sr Manager Review', href: '/wfm/reviews/senior-manager', icon: FileCheck2 }
+    ]
+  },
+  {
+    title: 'ANALYTICS',
+    roles: ['WFM'],
+    items: [
+      { label: 'Coverage', href: '/wfm/analytics/coverage', icon: Activity },
+      { label: 'Capacity', href: '/wfm/analytics/capacity', icon: Network },
+      { label: 'Reports', href: '/wfm/analytics/reports', icon: FileSpreadsheet }
+    ]
+  },
+  {
+    title: 'CONFIGURATION',
+    roles: ['WFM'],
+    items: [
+      { label: 'Rules & Settings', href: '/wfm/settings/rules', icon: Settings },
+      { label: 'Shift Configuration', href: '/wfm/settings/shifts', icon: Calendar },
+      { label: 'Holiday Calendar', href: '/wfm/settings/holidays', icon: CalendarRange }
+    ]
+  },
+  {
+    title: 'SYSTEM',
+    roles: ['WFM'],
+    items: [
+      { label: 'Notifications', href: '/wfm/system/notifications', icon: Bell },
+      { label: 'Audit Logs', href: '/wfm/system/audit', icon: FileCheck2 }
+    ]
+  },
+
+  // ==========================================
+  // SENIOR MANAGER CONFIGURATION
+  // ==========================================
+  {
+    title: 'Executive View',
     roles: ['SENIOR_MANAGER'],
     items: [
-      { label: 'Dashboard', href: '/senior-manager/dashboard', icon: LayoutDashboard },
-      { label: 'Business Capacity', href: '/senior-manager/capacity', icon: Building2 },
-      { label: 'Cross-Team Coverage', href: '/senior-manager/coverage', icon: BarChart3 },
-      { label: 'Approvals', href: '/senior-manager/approvals', icon: ClipboardCheck },
+      { label: 'Executive Summary', href: '/senior-manager/dashboard', icon: LayoutDashboard },
+      { label: 'Portfolio Operations', href: '/senior-manager/operations', icon: Briefcase },
+      { label: 'Analytics & Insights', href: '/senior-manager/analytics', icon: BarChart3 },
     ],
   },
+
+  // ==========================================
+  // MANAGER CONFIGURATION
+  // ==========================================
   {
-    title: 'Organization',
+    title: 'Manager View',
     roles: ['MANAGER'],
     items: [
-      { label: 'Dashboard', href: '/manager/dashboard', icon: LayoutDashboard },
-      { label: 'Org Overview', href: '/manager/organization', icon: Building2 },
-      { label: 'Coverage', href: '/manager/coverage', icon: BarChart3 },
-      { label: 'Roster Review', href: '/manager/roster-review', icon: FileCheck2 },
+      { label: 'Project Health', href: '/manager/dashboard', icon: LayoutDashboard },
+      { label: 'Organization', href: '/manager/organization', icon: Users },
+      { label: 'Master Coverage', href: '/manager/coverage', icon: BarChart3 },
+      { label: 'Roster Approvals', href: '/manager/roster-review', icon: FileCheck2 },
     ],
   },
+
+  // ==========================================
+  // ASSOCIATE MANAGER (AM) CONFIGURATION
+  // ==========================================
   {
-    title: 'Operations',
+    title: 'AM View',
     roles: ['AM'],
     items: [
-      { label: 'Dashboard', href: '/am/dashboard', icon: LayoutDashboard },
-      { label: 'Teams', href: '/am/teams', icon: Users },
-      { label: 'Coverage', href: '/am/coverage', icon: BarChart3 },
+      { label: 'Operations Overview', href: '/am/dashboard', icon: LayoutDashboard },
+      { label: 'My Teams', href: '/am/teams', icon: Users },
+      { label: 'Coverage', href: '/am/coverage', icon: CalendarRange },
       { label: 'Exceptions', href: '/am/exceptions', icon: AlertCircle },
     ],
   },
+
+  // ==========================================
+  // TEAM LEADER (TL) CONFIGURATION
+  // ==========================================
   {
-    title: 'Team Management',
+    title: 'Team Leader View',
     roles: ['TL'],
     items: [
-      { label: 'Dashboard', href: '/tl/dashboard', icon: LayoutDashboard },
+      { label: 'TL Dashboard', href: '/tl/dashboard', icon: LayoutDashboard },
       { label: 'My Team', href: '/tl/team', icon: Users },
-      { label: 'Preferences Review', href: '/tl/preferences', icon: ClipboardCheck },
-      { label: 'Team Roster', href: '/tl/roster', icon: CalendarDays },
+      { label: 'Team Roster', href: '/tl/roster', icon: Calendar },
+      { label: 'Review Preferences', href: '/tl/preferences', icon: FileCheck2 },
       { label: 'Team Issues', href: '/tl/issues', icon: AlertCircle },
     ],
   },
+
+  // ==========================================
+  // ASSOCIATE CONFIGURATION
+  // ==========================================
   {
-    title: 'Personal',
-    roles: ['ASSOCIATE', 'TL', 'AM', 'MANAGER', 'SENIOR_MANAGER', 'WFM'],
+    title: 'Associate View',
+    roles: ['ASSOCIATE'],
     items: [
-      { label: 'My Dashboard', href: '/associate/dashboard', icon: LayoutDashboard },
-      { label: 'My Roster', href: '/associate/roster', icon: CalendarDays },
+      { label: 'Dashboard', href: '/associate/dashboard', icon: LayoutDashboard },
+      { label: 'My Roster', href: '/associate/roster', icon: Calendar },
       { label: 'Preferences', href: '/associate/preferences', icon: Settings },
-      { label: 'Leaves', href: '/associate/leaves', icon: Briefcase },
+      { label: 'My Leaves', href: '/associate/leaves', icon: UserCircle },
     ],
   },
 ];
-
-// Placeholder icon for Sparkles since it's used above but not imported natively in this file easily without breaking the list formatting.
-function SparklesIcon(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
-      <path d="M5 3v4" />
-      <path d="M19 17v4" />
-      <path d="M3 5h4" />
-      <path d="M17 19h4" />
-    </svg>
-  );
-}

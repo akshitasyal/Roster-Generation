@@ -28,7 +28,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-wfm-dark text-slate-200">
+    <div className="flex h-screen w-full overflow-hidden bg-wfm-dark text-slate-800">
       <Sidebar />
       
       <div className="flex-1 flex flex-col h-screen overflow-hidden relative">

@@ -1,14 +1,17 @@
 @import "tailwindcss";
 
 @theme {
-  --color-wfm-dark: #0a0a0f;
-  --color-wfm-panel: #14151a;
-  --color-wfm-card: #1c1d24;
-  --color-wfm-border: #2a2b36;
+  --color-wfm-dark: #f4f6f8; /* Changed to light background */
+  --color-wfm-panel: #ffffff; /* Changed to white */
+  --color-wfm-card: #ffffff; /* Changed to white */
+  --color-wfm-border: #e2e8f0; /* Light gray border */
   
-  --color-brand-primary: #6366f1;
-  --color-brand-secondary: #8b5cf6;
-  --color-brand-accent: #06b6d4;
+  --color-sidebar-bg: #171b24; /* Dark sidebar from screenshot */
+  --color-sidebar-border: #2d3748;
+  
+  --color-brand-primary: #e31837; /* Tech Mahindra Red */
+  --color-brand-secondary: #c8102e; /* Darker Red */
+  --color-brand-accent: #3182ce; /* Blue for links/accents */
   
   --color-success: #10b981;
   --color-warning: #f59e0b;
@@ -32,46 +35,52 @@
 
 @layer base {
   :root {
-    color-scheme: dark;
+    color-scheme: light;
   }
   
   body {
-    @apply bg-wfm-dark text-slate-200 antialiased font-sans selection:bg-brand-primary/30 selection:text-brand-primary;
-    background-image: 
-      radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.15) 0px, transparent 50%);
-    background-attachment: fixed;
+    @apply bg-wfm-dark text-slate-800 antialiased font-sans selection:bg-brand-primary/20 selection:text-brand-primary;
   }
 }
 
 @layer components {
   .glass-panel {
-    @apply bg-wfm-panel/70 backdrop-blur-xl border border-wfm-border/50 shadow-2xl;
+    @apply bg-wfm-panel border border-wfm-border shadow-sm;
   }
   
   .glass-card {
-    @apply bg-wfm-card/60 backdrop-blur-lg border border-wfm-border shadow-lg rounded-2xl hover:border-brand-primary/50 transition-colors duration-300;
+    @apply bg-wfm-card border border-wfm-border shadow-sm rounded-xl transition-shadow duration-300;
   }
   
   .btn-primary {
-    @apply relative inline-flex items-center justify-center px-6 py-2.5 overflow-hidden font-medium text-white rounded-xl shadow-md transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none;
-    background: linear-gradient(135deg, var(--color-brand-primary), var(--color-brand-secondary));
-  }
-  
-  .btn-primary::before {
-    content: '';
-    @apply absolute inset-0 bg-white/20 translate-y-full transition-transform duration-300;
-  }
-  
-  .btn-primary:hover::before {
-    @apply translate-y-0;
+    @apply inline-flex items-center justify-center px-4 py-2 font-medium text-white bg-brand-primary rounded-lg transition-colors duration-200 hover:bg-brand-secondary active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none;
   }
   
   .btn-secondary {
-    @apply inline-flex items-center justify-center px-6 py-2.5 font-medium text-slate-300 bg-wfm-card border border-wfm-border rounded-xl transition-all duration-300 hover:bg-wfm-border hover:text-white active:scale-[0.98];
+    @apply inline-flex items-center justify-center px-4 py-2 font-medium text-slate-700 bg-white border border-slate-300 rounded-lg transition-colors duration-200 hover:bg-slate-50 hover:text-slate-900 active:scale-[0.98];
   }
   
   .gradient-text {
-    @apply text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-accent;
+    @apply text-brand-primary;
+  }
+
+  /* Status Badges */
+  .badge-success {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-success/10 text-success text-xs font-semibold;
+  }
+  
+  .badge-warning {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-warning/10 text-warning text-xs font-semibold;
+  }
+
+  /* Table overrides for light theme */
+  table th {
+    @apply text-slate-500 font-semibold text-xs tracking-wider border-b border-wfm-border bg-slate-50 p-4;
+  }
+  table td {
+    @apply text-slate-700 text-sm p-4 border-b border-wfm-border;
+  }
+  table tr:hover td {
+    @apply bg-slate-50/50;
   }
 }
