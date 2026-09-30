@@ -15,6 +15,7 @@ public class SolverRunner {
     
     private final RosterModelBuilder modelBuilder;
     private final ConstraintBuilder constraintBuilder;
+    private final CoverageConstraintBuilder coverageConstraintBuilder;
     private final ObjectiveBuilder objectiveBuilder;
     private final SolutionMapper solutionMapper;
 
@@ -23,6 +24,7 @@ public class SolverRunner {
         
         RosterModelBuilder.ModelData data = modelBuilder.buildModel(snapshot);
         constraintBuilder.addHardConstraints(data, snapshot);
+        coverageConstraintBuilder.addCoverageConstraints(data, snapshot);
         objectiveBuilder.buildObjective(data, snapshot);
 
         CpSolver solver = new CpSolver();

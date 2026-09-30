@@ -39,6 +39,9 @@ public class RosterModelBuilder {
         // Off variable: off[employeeIdx][dateIdx]
         public final BoolVar[][] off;
 
+        // Demand shortages: shortage[demandIdx]
+        public final IntVar[] shortages;
+
         // Index maps for lookup
         public final Map<Long, Integer> employeeIndexById;
         public final Map<Long, Integer> shiftIndexById;
@@ -50,6 +53,7 @@ public class RosterModelBuilder {
                          List<LocalDate> dates,
                          BoolVar[][][] x,
                          BoolVar[][] off,
+                         IntVar[] shortages,
                          Map<Long, Integer> employeeIndexById,
                          Map<Long, Integer> shiftIndexById,
                          Map<LocalDate, Integer> dateIndexByDate) {
@@ -59,6 +63,7 @@ public class RosterModelBuilder {
             this.dates = dates;
             this.x = x;
             this.off = off;
+            this.shortages = shortages;
             this.employeeIndexById = employeeIndexById;
             this.shiftIndexById = shiftIndexById;
             this.dateIndexByDate = dateIndexByDate;
@@ -151,7 +156,15 @@ public class RosterModelBuilder {
             }
         }
 
-        return new ModelData(model, employees, shifts, dates, x, off,
+        // Create shortage variables for each demand
+        List<PlanningSnapshot.DemandSnapshot> demands = snapshot.getDemands() != null ? snapshot.getDemands() : Collections.emptyList();
+        IntVar[] shortages = new IntVar[demands.size()];
+        for (int i = 0; i < demands.size(); i++) {
+            // max shortage is the required headcount
+            shortages[i] = model.newIntVar(0, demands.get(i).getRequiredHeadcount(), "shortage_" + i);
+        }
+
+        return new ModelData(model, employees, shifts, dates, x, off, shortages,
                 empIdx, shiftIdx, dateIdx);
     }
 }

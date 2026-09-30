@@ -92,8 +92,9 @@ public class ConstraintBuilder {
             }
         }
 
-        // REST GAP (H6: 11 Hours minimum)
-        // If assigned shift s1 on day d, cannot assign shift s2 on day d+1 if gap < 11
+        // REST GAP (H6: Minimum Rest)
+        // If assigned shift s1 on day d, cannot assign shift s2 on day d+1 if gap < minRestHours
+        int minRest = snapshot.getRules() != null ? snapshot.getRules().getMinRestHours() : 11;
         for (int e = 0; e < E; e++) {
             for (int d = 0; d < D - 1; d++) {
                 for (int s1 = 0; s1 < S; s1++) {
@@ -101,12 +102,9 @@ public class ConstraintBuilder {
                         PlanningSnapshot.ShiftSnapshot sh1 = data.shifts.get(s1);
                         PlanningSnapshot.ShiftSnapshot sh2 = data.shifts.get(s2);
                         
-                        double end1 = sh1.getEndHour();
-                        double start2 = sh2.getStartHour() + 24.0; // Day 2 is +24h
-                        double gap = start2 - end1;
-                        if (gap < 0) gap += 24.0; // Wrap around if needed (simple approximation)
+                        double gap = (sh2.getStartHour() + 24.0) - sh1.getEndHour();
 
-                        if (gap < 11.0) {
+                        if (gap < minRest) {
                             // Cannot have both: x[e][d][s1] + x[e][d+1][s2] <= 1
                             model.addLessOrEqual(LinearExpr.newBuilder()
                                     .add(data.x[e][d][s1])
