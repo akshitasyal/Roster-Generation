@@ -1,16 +1,27 @@
 'use client';
 
-import { Search, Filter, Edit, ShieldAlert } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Search, Filter, ShieldAlert } from 'lucide-react';
 import Link from 'next/link';
+import { api } from '@/lib/api';
 
 export default function WfmWorkforcePage() {
-  const employees = [
-    { id: 'EMP-1042', name: 'John Doe', role: 'Associate', skill: 'Technical L2', team: 'Alpha', status: 'Active' },
-    { id: 'EMP-1043', name: 'Jane Smith', role: 'Associate', skill: 'Voice L1', team: 'Alpha', status: 'Active' },
-    { id: 'EMP-0056', name: 'Arun Kumar', role: 'Team Leader', skill: 'Management', team: 'Alpha', status: 'Active' },
-    { id: 'EMP-0012', name: 'Sunita Rao', role: 'Associate Manager', skill: 'Management', team: 'N/A', status: 'Active' },
-    { id: 'EMP-1102', name: 'Emily Davis', role: 'Associate', skill: 'Chat Support', team: 'Bravo', status: 'Leave' },
-  ];
+  const [employees, setEmployees] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        const data = await api.get('/employees');
+        setEmployees(data);
+      } catch (err) {
+        console.error('Failed to fetch employees:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchEmployees();
+  }, []);
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -55,25 +66,27 @@ export default function WfmWorkforcePage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-wfm-border">
-              {employees.map((emp) => (
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="p-8 text-center text-slate-500">Loading workforce data...</td>
+                </tr>
+              ) : employees.map((emp) => (
                 <tr key={emp.id} className="hover:bg-white/[0.02] transition-colors">
-                  <td className="p-4 text-sm font-mono text-slate-300">{emp.id}</td>
-                  <td className="p-4 text-sm font-medium text-white">{emp.name}</td>
+                  <td className="p-4 text-sm font-mono text-slate-500">{emp.employeeCode}</td>
+                  <td className="p-4 text-sm font-medium text-slate-800">{emp.firstName} {emp.lastName}</td>
                   <td className="p-4 text-sm text-brand-primary">{emp.role}</td>
                   <td className="p-4">
-                    <span className="px-2 py-1 bg-wfm-dark border border-wfm-border rounded-md text-xs text-slate-300">{emp.skill}</span>
+                    <span className="px-2 py-1 bg-slate-50 border border-slate-200 rounded-md text-xs text-slate-600">{emp.skillName || 'N/A'}</span>
                   </td>
-                  <td className="p-4 text-sm text-slate-300">{emp.team}</td>
+                  <td className="p-4 text-sm text-slate-600">{emp.teamName || 'N/A'}</td>
                   <td className="p-4">
-                    <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                      emp.status === 'Active' ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'
-                    }`}>
-                      {emp.status}
+                    <span className="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-success/10 text-success">
+                      Active
                     </span>
                   </td>
                   <td className="p-4 text-right">
-                    <button className="text-slate-500 hover:text-brand-primary transition-colors p-1 rounded hover:bg-brand-primary/10">
-                      <Edit className="w-4 h-4" />
+                    <button className="text-slate-400 hover:text-brand-primary transition-colors p-1 rounded hover:bg-brand-primary/10">
+                      Edit
                     </button>
                   </td>
                 </tr>

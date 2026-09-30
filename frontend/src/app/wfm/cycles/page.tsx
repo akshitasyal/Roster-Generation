@@ -1,15 +1,27 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Calendar, Search, Filter, Plus, ChevronRight, CheckCircle2, Clock, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
+import { api } from '@/lib/api';
 
 export default function PlanningCyclesPage() {
-  const cycles = [
-    { id: '2026-W42', dates: '12 Oct - 18 Oct 2026', project: 'Banking Support', status: 'DRAFT', demand: 'Ready', prefs: 'Pending', roster: 'Not Generated', approval: 'N/A' },
-    { id: '2026-W41', dates: '05 Oct - 11 Oct 2026', project: 'Banking Support', status: 'UNDER REVIEW', demand: 'Loaded', prefs: 'Complete', roster: 'Generated', approval: 'Pending Manager' },
-    { id: '2026-W40', dates: '28 Sep - 04 Oct 2026', project: 'Banking Support', status: 'PUBLISHED', demand: 'Locked', prefs: 'Locked', roster: 'Published', approval: 'Approved' },
-    { id: '2026-W41', dates: '05 Oct - 11 Oct 2026', project: 'Telecom L1', status: 'VALIDATED', demand: 'Loaded', prefs: 'Complete', roster: 'Generated', approval: 'Pending TL' },
-  ];
+  const [cycles, setCycles] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCycles = async () => {
+      try {
+        const data = await api.get('/planning-cycles');
+        setCycles(data);
+      } catch (err) {
+        console.error('Failed to fetch planning cycles:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCycles();
+  }, []);
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -51,38 +63,42 @@ export default function PlanningCyclesPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-wfm-border">
-              {cycles.map((cycle, idx) => (
-                <tr key={idx} className="hover:bg-white/[0.02] transition-colors group cursor-pointer">
+              {loading ? (
+                <tr>
+                  <td colSpan={8} className="p-8 text-center text-slate-500">Loading planning cycles...</td>
+                </tr>
+              ) : cycles.map((cycle, idx) => (
+                <tr key={idx} className="hover:bg-slate-50 transition-colors group cursor-pointer">
                   <td className="p-4">
                     <div className="flex items-center gap-3">
                       <Calendar className="w-5 h-5 text-brand-primary" />
                       <div>
-                        <div className="font-bold text-white group-hover:text-brand-primary transition-colors">{cycle.id}</div>
-                        <div className="text-xs text-slate-400 mt-0.5">{cycle.dates}</div>
+                        <div className="font-bold text-slate-800 group-hover:text-brand-primary transition-colors">{cycle.name || `Cycle-${cycle.id}`}</div>
+                        <div className="text-xs text-slate-500 mt-0.5">{cycle.startDate} - {cycle.endDate}</div>
                       </div>
                     </div>
                   </td>
-                  <td className="p-4 text-sm font-medium text-slate-300">{cycle.project}</td>
+                  <td className="p-4 text-sm font-medium text-slate-700">{cycle.project || 'Global'}</td>
                   <td className="p-4">
                     <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
                       cycle.status === 'PUBLISHED' ? 'bg-success/10 text-success border-success/30' :
-                      cycle.status === 'UNDER REVIEW' || cycle.status === 'VALIDATED' ? 'bg-warning/10 text-warning border-warning/30' :
-                      'bg-wfm-panel text-slate-300 border-wfm-border'
+                      cycle.status === 'UNDER_REVIEW' || cycle.status === 'VALIDATED' ? 'bg-warning/10 text-warning border-warning/30' :
+                      'bg-slate-100 text-slate-600 border-slate-200'
                     }`}>
-                      {cycle.status}
+                      {cycle.status || 'DRAFT'}
                     </span>
                   </td>
                   <td className="p-4 text-center">
-                    <StatusBadge status={cycle.demand} />
+                    <StatusBadge status={cycle.demandStatus || 'Pending'} />
                   </td>
                   <td className="p-4 text-center">
-                    <StatusBadge status={cycle.prefs} />
+                    <StatusBadge status={cycle.preferenceStatus || 'Pending'} />
                   </td>
                   <td className="p-4 text-center">
-                    <StatusBadge status={cycle.roster} />
+                    <StatusBadge status={cycle.rosterStatus || 'Not Generated'} />
                   </td>
-                  <td className="p-4 text-center text-sm text-slate-300">
-                    {cycle.approval}
+                  <td className="p-4 text-center text-sm text-slate-600">
+                    {cycle.approvalStatus || 'N/A'}
                   </td>
                   <td className="p-4 text-right">
                     <Link href={`/wfm/cycles/${cycle.id}`} className="inline-flex items-center justify-center p-2 bg-brand-primary/10 text-brand-primary hover:bg-brand-primary hover:text-white rounded-lg transition-colors">

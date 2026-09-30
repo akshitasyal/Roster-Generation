@@ -13,8 +13,8 @@ export default function WfmExceptionsPage() {
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Global Exception Matrix</h1>
-          <p className="text-slate-400">Manage solver rule violations and manual overrides.</p>
+          <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Global Exception Matrix</h1>
+          <p className="text-slate-500">Manage solver rule violations and manual overrides.</p>
         </div>
         
         <div className="flex items-center gap-3 w-full md:w-auto">
@@ -23,17 +23,17 @@ export default function WfmExceptionsPage() {
             <input 
               type="text" 
               placeholder="Search exceptions..." 
-              className="w-full bg-wfm-card border border-wfm-border rounded-lg pl-9 pr-4 py-2 text-sm text-white focus:outline-none focus:border-brand-primary"
+              className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-4 py-2 text-sm text-slate-800 focus:outline-none focus:border-brand-primary"
             />
           </div>
           <button className="btn-secondary p-2"><Filter className="w-5 h-5"/></button>
         </div>
       </div>
 
-      <div className="glass-card overflow-hidden border-danger/30">
+      <div className="glass-card overflow-hidden border-danger/30 bg-white">
         <div className="p-4 border-b border-wfm-border bg-danger/5 flex items-center gap-3">
           <ShieldAlert className="w-5 h-5 text-danger" />
-          <h3 className="font-semibold text-white">Validation Alerts (3)</h3>
+          <h3 className="font-semibold text-slate-800">Validation Alerts (3)</h3>
         </div>
         
         <div className="w-full overflow-x-auto">
@@ -50,20 +50,20 @@ export default function WfmExceptionsPage() {
             </thead>
             <tbody className="divide-y divide-wfm-border">
               {exceptions.map((ex) => (
-                <tr key={ex.id} className="hover:bg-white/[0.02] transition-colors">
-                  <td className="p-4 text-sm font-mono text-slate-400">{ex.id}</td>
-                  <td className="p-4 text-sm font-medium text-white">{ex.rule}</td>
+                <tr key={ex.id} className="hover:bg-slate-50 transition-colors">
+                  <td className="p-4 text-sm font-mono text-slate-500">{ex.id}</td>
+                  <td className="p-4 text-sm font-medium text-slate-800">{ex.rule}</td>
                   <td className="p-4 text-sm text-brand-primary">{ex.target}</td>
                   <td className="p-4">
                     <span className={`px-2 py-1 rounded-md text-xs font-bold ${
-                      ex.severity === 'CRITICAL' ? 'bg-danger/20 text-danger border border-danger/30' : 
-                      ex.severity === 'ERROR' ? 'bg-warning/20 text-warning border border-warning/30' : 
-                      'bg-wfm-dark border border-wfm-border text-slate-400'
+                      ex.severity === 'CRITICAL' ? 'bg-danger/10 text-danger border border-danger/30' : 
+                      ex.severity === 'ERROR' ? 'bg-warning/10 text-warning border border-warning/30' : 
+                      'bg-slate-50 border border-slate-200 text-slate-500'
                     }`}>
                       {ex.severity}
                     </span>
                   </td>
-                  <td className="p-4 text-sm text-slate-300">{ex.desc}</td>
+                  <td className="p-4 text-sm text-slate-600">{ex.desc}</td>
                   <td className="p-4 text-right">
                     {ex.actionRequired ? (
                       <div className="flex justify-end gap-2">

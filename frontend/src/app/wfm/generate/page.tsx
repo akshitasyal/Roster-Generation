@@ -1,9 +1,47 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Check, ShieldAlert, Zap, Server, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
+import { api } from '@/lib/api';
+import { useRouter } from 'next/navigation';
 
 export default function WfmGeneratePage() {
+  const [cycles, setCycles] = useState<any[]>([]);
+  const [selectedCycle, setSelectedCycle] = useState<string>('');
+  const [generating, setGenerating] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    const fetchCycles = async () => {
+      try {
+        const data = await api.get('/planning-cycles');
+        // Filter to only draft or pending cycles if needed, right now we just show all
+        setCycles(data);
+        if (data.length > 0) {
+          setSelectedCycle(data[0].id.toString());
+        }
+      } catch (err) {
+        console.error('Failed to fetch planning cycles:', err);
+      }
+    };
+    fetchCycles();
+  }, []);
+
+  const handleGenerate = async () => {
+    if (!selectedCycle) return;
+    setGenerating(true);
+    try {
+      await api.post(`/roster/generation/cycle/${selectedCycle}`, {});
+      // Redirect to the cycle's roster page to view the generated draft
+      router.push(`/wfm/cycles/${selectedCycle}/roster`);
+    } catch (err) {
+      console.error('Generation failed:', err);
+      alert('Failed to generate roster. See console for details.');
+    } finally {
+      setGenerating(false);
+    }
+  };
   return (
     <div className="space-y-6 animate-fade-in max-w-4xl mx-auto">
       <div className="text-center mb-8">
@@ -20,9 +58,16 @@ export default function WfmGeneratePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="text-xs text-slate-500 uppercase font-bold mb-1 block">Planning Cycle</label>
-              <select className="w-full bg-wfm-dark border border-wfm-border rounded p-2.5 text-white text-sm focus:outline-none focus:border-brand-primary">
-                <option>2026-W42 (12 Oct - 18 Oct 2026)</option>
-                <option>2026-W43 (19 Oct - 25 Oct 2026)</option>
+              <select 
+                value={selectedCycle}
+                onChange={(e) => setSelectedCycle(e.target.value)}
+                className="w-full bg-slate-50 border border-slate-200 rounded p-2.5 text-slate-800 text-sm focus:outline-none focus:border-brand-primary"
+              >
+                {cycles.map(cycle => (
+                  <option key={cycle.id} value={cycle.id}>
+                    {cycle.name || `Cycle-${cycle.id}`} ({cycle.startDate} - {cycle.endDate})
+                  </option>
+                ))}
               </select>
             </div>
             <div>
@@ -84,8 +129,17 @@ export default function WfmGeneratePage() {
             <div><span className="text-slate-500 mr-2">Max Consecutive:</span> 6</div>
           </div>
           
-          <button className="w-full btn-primary py-4 text-lg font-bold flex justify-center items-center gap-3 shadow-brand-primary/20 hover:shadow-brand-primary/40">
-            <Zap className="w-5 h-5 fill-current" /> Generate Draft Roster
+          <button 
+            onClick={handleGenerate}
+            disabled={generating || !selectedCycle}
+            className="w-full btn-primary py-4 text-lg font-bold flex justify-center items-center gap-3 shadow-md shadow-brand-primary/20 hover:shadow-brand-primary/30"
+          >
+            {generating ? (
+              <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              <Zap className="w-5 h-5 fill-current" />
+            )}
+            {generating ? 'Engine Running...' : 'Generate Draft Roster'}
           </button>
           <p className="text-center text-xs text-slate-500 mt-3">This will create a new draft roster version. Existing published rosters will not be modified.</p>
         </div>

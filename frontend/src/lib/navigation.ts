@@ -49,9 +49,7 @@ export const NAVIGATION_CONFIG: NavSection[] = [
     roles: ['WFM'],
     items: [
       { label: 'Planning Cycles', href: '/wfm/cycles', icon: CalendarRange },
-      { label: 'Demand Management', href: '/wfm/demand', icon: BarChart3 },
-      { label: 'Workforce', href: '/wfm/workforce', icon: Users },
-      { label: 'Preferences', href: '/wfm/preferences', icon: ClipboardList }
+      { label: 'Workforce Snapshot', href: '/wfm/workforce', icon: Users },
     ]
   },
   {
@@ -59,47 +57,15 @@ export const NAVIGATION_CONFIG: NavSection[] = [
     roles: ['WFM'],
     items: [
       { label: 'Generate Roster', href: '/wfm/generate', icon: Sparkles },
-      { label: 'Roster Versions', href: '/wfm/versions', icon: History },
-      { label: 'Validation', href: '/wfm/validation', icon: ShieldCheck },
-      { label: 'Exceptions', href: '/wfm/exceptions', icon: AlertCircle },
-      { label: 'Adjustments', href: '/wfm/adjustments', icon: GitMerge },
+      { label: 'Global Exceptions', href: '/wfm/exceptions', icon: AlertCircle },
       { label: 'Published Rosters', href: '/wfm/published', icon: CheckSquare }
-    ]
-  },
-  {
-    title: 'MANAGEMENT',
-    roles: ['WFM'],
-    items: [
-      { label: 'TL Review', href: '/wfm/reviews/tl', icon: FileCheck2 },
-      { label: 'AM Review', href: '/wfm/reviews/am', icon: FileCheck2 },
-      { label: 'Manager Review', href: '/wfm/reviews/manager', icon: FileCheck2 },
-      { label: 'Sr Manager Review', href: '/wfm/reviews/senior-manager', icon: FileCheck2 }
-    ]
-  },
-  {
-    title: 'ANALYTICS',
-    roles: ['WFM'],
-    items: [
-      { label: 'Coverage', href: '/wfm/analytics/coverage', icon: Activity },
-      { label: 'Capacity', href: '/wfm/analytics/capacity', icon: Network },
-      { label: 'Reports', href: '/wfm/analytics/reports', icon: FileSpreadsheet }
-    ]
-  },
-  {
-    title: 'CONFIGURATION',
-    roles: ['WFM'],
-    items: [
-      { label: 'Rules & Settings', href: '/wfm/settings/rules', icon: Settings },
-      { label: 'Shift Configuration', href: '/wfm/settings/shifts', icon: Calendar },
-      { label: 'Holiday Calendar', href: '/wfm/settings/holidays', icon: CalendarRange }
     ]
   },
   {
     title: 'SYSTEM',
     roles: ['WFM'],
     items: [
-      { label: 'Notifications', href: '/wfm/system/notifications', icon: Bell },
-      { label: 'Audit Logs', href: '/wfm/system/audit', icon: FileCheck2 }
+      { label: 'Settings', href: '/wfm/settings', icon: Settings },
     ]
   },
 

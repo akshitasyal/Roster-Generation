@@ -1,14 +1,33 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { CycleWorkspaceHeader } from '@/components/layout/CycleWorkspaceHeader';
 import { Lock, Settings, User, SlidersHorizontal, Search, Download } from 'lucide-react';
-import { useState } from 'react';
+import { api } from '@/lib/api';
 
 export default function CycleRosterPage() {
   const params = useParams();
   const cycleId = params.id as string;
   const [selectedCell, setSelectedCell] = useState<any>(null);
+  const [assignments, setAssignments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAssignments = async () => {
+      try {
+        // Fallback to version=1 for demonstration, or map cycleId to versionId properly
+        const versionId = cycleId; 
+        const data = await api.get(`/roster/version/${versionId}`);
+        setAssignments(data);
+      } catch (err) {
+        console.error('Failed to fetch assignments:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAssignments();
+  }, [cycleId]);
 
   const employees = [
     { id: 'EMP-001', name: 'John Doe', shifts: ['Morning', 'Morning', 'Morning', 'Morning', 'Morning', 'OFF', 'OFF'], locked: [false, false, false, false, false, true, true] },
@@ -55,11 +74,15 @@ export default function CycleRosterPage() {
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-wfm-border text-slate-300">
-                {employees.map((emp, empIdx) => (
-                  <tr key={empIdx} className="hover:bg-white/[0.02]">
-                    <td className="p-3 border-r border-wfm-border sticky left-0 bg-wfm-card z-10">
-                      <div className="font-medium text-white">{emp.name}</div>
+              <tbody className="divide-y divide-wfm-border text-slate-700">
+                {loading ? (
+                  <tr>
+                    <td colSpan={8} className="p-8 text-center text-slate-500 font-medium">Loading generated roster...</td>
+                  </tr>
+                ) : employees.map((emp, empIdx) => (
+                  <tr key={empIdx} className="hover:bg-slate-50 transition-colors">
+                    <td className="p-3 border-r border-wfm-border sticky left-0 bg-white z-10 shadow-[1px_0_0_0_#e2e8f0]">
+                      <div className="font-semibold text-slate-800">{emp.name}</div>
                       <div className="text-[10px] text-slate-500 font-mono">{emp.id}</div>
                     </td>
                     {emp.shifts.map((shift, dayIdx) => {
@@ -70,20 +93,20 @@ export default function CycleRosterPage() {
                         <td key={dayIdx} className="p-1">
                           <button 
                             onClick={() => setSelectedCell({ empIdx, dayIdx, emp, shift, day: days[dayIdx], isLocked })}
-                            className={`w-full h-full min-h-[48px] p-2 rounded flex flex-col items-center justify-center relative transition-all border ${
-                              isSelected ? 'border-brand-primary bg-brand-primary/10 shadow-[0_0_10px_rgba(var(--color-brand-primary),0.3)]' : 
-                              'border-transparent hover:border-slate-600 hover:bg-white/[0.05]'
+                            className={`w-full h-full min-h-[48px] p-2 rounded-lg flex flex-col items-center justify-center relative transition-all border ${
+                              isSelected ? 'border-brand-primary bg-brand-primary/10 shadow-sm ring-1 ring-brand-primary' : 
+                              'border-transparent hover:border-slate-300 hover:bg-slate-50'
                             } ${
-                              shift === 'OFF' ? 'bg-wfm-dark/50 text-slate-500' :
-                              shift === 'Night' ? 'bg-indigo-900/20 text-indigo-300' :
-                              'bg-brand-primary/5 text-slate-200'
+                              shift === 'OFF' ? 'bg-slate-100 text-slate-500' :
+                              shift === 'Night' ? 'bg-slate-800 text-white' :
+                              'bg-brand-primary/5 text-brand-primary font-semibold'
                             }`}
                           >
-                            <span className={`font-semibold ${shift === 'OFF' ? 'text-xs' : 'text-sm'}`}>{shift}</span>
-                            {shift !== 'OFF' && <span className="text-[10px] opacity-70">
+                            <span className={`font-bold ${shift === 'OFF' ? 'text-xs uppercase tracking-wider' : 'text-sm'}`}>{shift}</span>
+                            {shift !== 'OFF' && <span className="text-[10px] opacity-75 font-medium mt-0.5">
                               {shift === 'Morning' ? '09:00-18:00' : shift === 'Evening' ? '14:00-23:00' : '22:00-07:00'}
                             </span>}
-                            {isLocked && <Lock className="w-3 h-3 absolute top-1 right-1 text-slate-500" />}
+                            {isLocked && <Lock className="w-3 h-3 absolute top-1.5 right-1.5 text-slate-400" />}
                           </button>
                         </td>
                       );
