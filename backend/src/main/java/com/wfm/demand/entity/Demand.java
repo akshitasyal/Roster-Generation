@@ -61,6 +61,10 @@ public class Demand extends BaseEntity {
     // NULL = management coverage (no skill requirement)
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "skill_level_id")
+    private com.wfm.skill.entity.SkillLevel skillLevel;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "role_id")
     private Role role;
     // NULL = demand applies to any role

@@ -58,6 +58,10 @@ public class EmployeeOrgAssignment extends BaseEntity {
     @Builder.Default
     private Boolean isPrimary = true;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shift_pattern_id")
+    private com.wfm.shift.entity.ShiftPattern shiftPattern;
+
     /**
      * Returns true if this assignment is currently active on the given date.
      */

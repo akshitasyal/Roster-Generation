@@ -29,10 +29,9 @@ public class EmployeeSkill extends BaseEntity {
     @JoinColumn(name = "skill_id", nullable = false)
     private Skill skill;
 
-    @Column(name = "skill_level", nullable = false, length = 30)
-    @Builder.Default
-    private String skillLevel = "BEGINNER";
-    // BEGINNER | INTERMEDIATE | ADVANCED | EXPERT
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "skill_level_id", nullable = false)
+    private SkillLevel skillLevel;
 
     @Column(name = "certified", nullable = false)
     @Builder.Default
@@ -46,29 +45,11 @@ public class EmployeeSkill extends BaseEntity {
     // NULL = currently active
 
     /**
-     * Returns skill level as numeric for comparison.
-     * BEGINNER=1, INTERMEDIATE=2, ADVANCED=3, EXPERT=4
-     */
-    public int getSkillLevelNumeric() {
-        return switch (skillLevel) {
-            case "EXPERT"       -> 4;
-            case "ADVANCED"     -> 3;
-            case "INTERMEDIATE" -> 2;
-            default             -> 1; // BEGINNER
-        };
-    }
-
-    /**
      * Returns true if skill meets the minimum required level.
      */
-    public boolean meetsMinimumLevel(String requiredLevel) {
-        int required = switch (requiredLevel) {
-            case "EXPERT"       -> 4;
-            case "ADVANCED"     -> 3;
-            case "INTERMEDIATE" -> 2;
-            default             -> 1;
-        };
-        return getSkillLevelNumeric() >= required;
+    public boolean meetsMinimumLevel(SkillLevel requiredLevel) {
+        if (requiredLevel == null || this.skillLevel == null) return false;
+        return this.skillLevel.getLevelWeight() >= requiredLevel.getLevelWeight();
     }
 
     /**
