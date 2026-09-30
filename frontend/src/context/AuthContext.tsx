@@ -59,12 +59,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(userData);
       
       // Redirect based on role
-      if (userData.role === 'WFM') {
-        router.push('/wfm/dashboard');
-      } else if (userData.role === 'TL') {
-        router.push('/tl/dashboard');
-      } else {
-        router.push('/associate/dashboard');
+      switch (userData.role) {
+        case 'WFM':
+          router.push('/wfm/dashboard');
+          break;
+        case 'SENIOR_MANAGER':
+          router.push('/senior-manager/dashboard');
+          break;
+        case 'MANAGER':
+          router.push('/manager/dashboard');
+          break;
+        case 'AM':
+          router.push('/am/dashboard');
+          break;
+        case 'TL':
+          router.push('/tl/dashboard');
+          break;
+        default:
+          router.push('/associate/dashboard');
+          break;
       }
       
     } catch (error) {

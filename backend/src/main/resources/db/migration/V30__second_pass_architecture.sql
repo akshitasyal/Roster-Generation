@@ -107,7 +107,7 @@ CREATE TABLE management_coverage_requirements (
 -- 7. Preference Reviews Workflow
 CREATE TABLE preference_reviews (
     id            BIGSERIAL PRIMARY KEY,
-    preference_id BIGINT      NOT NULL REFERENCES shift_preferences(id),
+    preference_id BIGINT      NOT NULL REFERENCES employee_preferences(id),
     reviewer_id   BIGINT      REFERENCES employees(id),
     decision      VARCHAR(30) NOT NULL DEFAULT 'PENDING', -- PENDING, DECLINED, AUTO_ACCEPTED
     reason        TEXT,

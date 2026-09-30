@@ -11,12 +11,13 @@ import com.wfm.employee.entity.Employee;
 import com.wfm.employee.repository.EmployeeRepository;
 import com.wfm.organization.entity.EmployeeOrgAssignment;
 import com.wfm.organization.repository.EmployeeOrgAssignmentRepository;
-import com.wfm.planning.entity.Holiday;
+import com.wfm.demand.repository.ManagementCoverageRequirementRepository;
+import com.wfm.employee.entity.Employee;
+import com.wfm.employee.repository.EmployeeRepository;
+import com.wfm.organization.entity.EmployeeOrgAssignment;
+import com.wfm.organization.repository.EmployeeOrgAssignmentRepository;
 import com.wfm.planning.entity.PlanningCycle;
-import com.wfm.planning.entity.ProjectHolidayPolicy;
-import com.wfm.planning.repository.HolidayRepository;
 import com.wfm.planning.repository.PlanningCycleRepository;
-import com.wfm.planning.repository.ProjectHolidayPolicyRepository;
 import com.wfm.preference.entity.EmployeePreference;
 import com.wfm.preference.entity.WeeklyOffPreference;
 import com.wfm.preference.repository.EmployeePreferenceRepository;
@@ -74,8 +75,6 @@ public class PlanningSnapshotBuilder {
     private final WeeklyOffPreferenceRepository weeklyOffRepo;
     private final RosterAssignmentRepository assignmentRepo;
     private final RosterLockRepository lockRepo;
-    private final HolidayRepository holidayRepo;
-    private final ProjectHolidayPolicyRepository projectHolidayRepo;
     private final ManagementCoverageRequirementRepository mgmtCoverageRepo;
     private final EmployeeOrgAssignmentRepository orgRepo;
     private final SkillLevelRepository skillLevelRepo;
@@ -183,7 +182,7 @@ public class PlanningSnapshotBuilder {
 
         // 13. Availability
         Map<Long, Set<LocalDate>> unavailableDates = availabilityRepo.findAll().stream()
-                .filter(a -> employeeIds.contains(a.getEmployee().getId()) && "UNAVAILABLE".equals(a.getAvailabilityType()))
+                .filter(a -> employeeIds.contains(a.getEmployee().getId()) && "UNAVAILABLE".equals(a.getAvailabilityStatus()))
                 .collect(Collectors.groupingBy(a -> a.getEmployee().getId(),
                         Collectors.mapping(Availability::getDate, Collectors.toSet())));
 
@@ -195,12 +194,12 @@ public class PlanningSnapshotBuilder {
 
         // 15-16. Preferences
         Map<Long, Long> preferredShift = prefRepo.findAll().stream()
-                .filter(p -> employeeIds.contains(p.getEmployee().getId()) && "APPROVED".equals(p.getStatus()))
+                .filter(p -> employeeIds.contains(p.getEmployee().getId()) && p.isActive())
                 .collect(Collectors.toMap(p -> p.getEmployee().getId(), p -> p.getPreferredShift().getId(), (v1,v2)->v1));
         
         Map<Long, List<String>> preferredOffDays = weeklyOffRepo.findAll().stream()
                 .filter(w -> employeeIds.contains(w.getEmployee().getId()))
-                .collect(Collectors.toMap(w -> w.getEmployee().getId(), w -> Arrays.asList(w.getPreferredDays().split(",")), (v1,v2)->v1));
+                .collect(Collectors.groupingBy(w -> w.getEmployee().getId(), Collectors.mapping(WeeklyOffPreference::getDayOfWeek, Collectors.toList())));
 
         // 17-18. Roster History & Locks
         Map<Long, Map<LocalDate, Long>> previousRoster = new HashMap<>();

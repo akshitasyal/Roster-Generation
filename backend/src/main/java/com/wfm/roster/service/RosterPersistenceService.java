@@ -40,11 +40,12 @@ public class RosterPersistenceService {
         PlanningCycle cycle = cycleRepo.findById(cycleId).orElseThrow();
         
         // 1. Create new draft version
+        int nextVersion = versionRepo.findByPlanningCycleId(cycleId).size() + 1;
         RosterVersion newVersion = RosterVersion.builder()
                 .planningCycle(cycle)
-                .versionName(versionMetadata)
+                .versionNotes(versionMetadata)
+                .versionNumber(nextVersion)
                 .status("DRAFT")
-                .createdBy("SYSTEM")
                 .build();
         versionRepo.save(newVersion);
 

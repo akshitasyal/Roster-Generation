@@ -16,6 +16,7 @@ public interface WfmUserRepository extends JpaRepository<WfmUser, Long> {
 
     Optional<WfmUser> findByUsername(String username);
 
+    @Query("SELECT u FROM WfmUser u WHERE u.employee.id = :employeeId")
     Optional<WfmUser> findByEmployeeId(Long employeeId);
 
     boolean existsByUsername(String username);
