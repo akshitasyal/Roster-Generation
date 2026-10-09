@@ -14,4 +14,7 @@ public class RosterAssignmentDTO {
     private String status;
     private String source;
     private Boolean locked;
+    private String employeeName;
+    private String employeeCode;
+    private String shiftCode;
 }

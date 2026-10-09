@@ -3,23 +3,47 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { api } from '@/lib/api';
 import { useRouter, usePathname } from 'next/navigation';
 
-interface User {
-  employeeId: number;
-  employeeCode: string;
+export interface User {
+  empId: string;
+  name: string;
   email: string;
-  role: string;
-  fullName: string;
+  designation: string;
+  skill: string;
+  portalRole: 'WFM' | 'EMPLOYEE' | string;
+  isWfm: boolean;
+  permissions?: string[];
 }
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
+  signup: (empId: string, email: string, password: string) => Promise<User>;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+export const getPortalForUser = (user: User): string => {
+  if (user.isWfm) {
+    return '/wfm/dashboard';
+  }
+  
+  switch (user.designation?.toLowerCase()) {
+    case 'associate':
+      return '/associate/dashboard';
+    case 'team leader':
+      return '/tl/dashboard';
+    case 'associate manager':
+      return '/am/dashboard';
+    case 'manager':
+      return '/manager/dashboard';
+    case 'senior manager':
+      return '/senior-manager/dashboard';
+    default:
+      return '/associate/dashboard'; 
+  }
+};
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -27,61 +51,89 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
-    // Check auth on mount
     const token = localStorage.getItem('accessToken');
-    const savedUser = localStorage.getItem('user');
+    const savedUserStr = localStorage.getItem('user');
     
-    if (token && savedUser) {
-      setUser(JSON.parse(savedUser));
-    } else if (pathname !== '/login') {
+    if (token && savedUserStr) {
+      try {
+        const parsed = JSON.parse(savedUserStr);
+        if (!parsed.portalRole || parsed.email?.endsWith('@acme.wfm')) {
+          console.warn('Clearing stale legacy session from localStorage.');
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('user');
+          setUser(null);
+          if (pathname !== '/login' && pathname !== '/signup') {
+            router.push('/login');
+          }
+        } else {
+          setUser(parsed);
+        }
+      } catch (e) {
+        localStorage.clear();
+        setUser(null);
+        if (pathname !== '/login' && pathname !== '/signup') {
+          router.push('/login');
+        }
+      }
+    } else if (pathname !== '/login' && pathname !== '/signup' && pathname !== '/') {
+      // NOTE: Added pathname !== '/' because '/' is handled by app/page.tsx routing logic.
       router.push('/login');
     }
     setLoading(false);
   }, [pathname, router]);
 
-  const login = async (email: string, password: string) => {
+  const processAuthResponse = (data: any): User => {
+    // WFM Identification: Senior Manager + Workforce Management skill
+    const isWfm = (data.designation === 'Senior Manager' && data.skill === 'Workforce Management') 
+                  || data.portalRole === 'WFM'
+                  || data.isWfm === true;
+
+    const userData: User = {
+      empId: data.empId || data.employeeCode || '',
+      name: data.fullName || data.name || '',
+      email: data.email || '',
+      designation: data.designation || '',
+      skill: data.skill || '',
+      portalRole: isWfm ? 'WFM' : 'EMPLOYEE',
+      isWfm: isWfm,
+      permissions: data.permissions || []
+    };
+
+    localStorage.setItem('accessToken', data.token || data.accessToken || '');
+    if (data.refreshToken) {
+      localStorage.setItem('refreshToken', data.refreshToken);
+    }
+    localStorage.setItem('user', JSON.stringify(userData));
+    setUser(userData);
+
+    return userData;
+  };
+
+  const login = async (email: string, password: string): Promise<User> => {
     try {
       const response = await api.post('/auth/login', { email, password });
-      const { data } = response;
-      
-      const userData = {
-        employeeId: data.employeeId,
-        employeeCode: data.employeeCode,
-        email: data.email,
-        role: data.role,
-        fullName: data.fullName
-      };
+      const data = response.data?.data || response.data;
+      const userData = processAuthResponse(data);
 
-      localStorage.setItem('accessToken', data.accessToken);
-      localStorage.setItem('refreshToken', data.refreshToken);
-      localStorage.setItem('user', JSON.stringify(userData));
-      
-      setUser(userData);
-      
-      // Redirect based on role
-      switch (userData.role) {
-        case 'WFM':
-          router.push('/wfm/dashboard');
-          break;
-        case 'SENIOR_MANAGER':
-          router.push('/senior-manager/dashboard');
-          break;
-        case 'MANAGER':
-          router.push('/manager/dashboard');
-          break;
-        case 'AM':
-          router.push('/am/dashboard');
-          break;
-        case 'TL':
-          router.push('/tl/dashboard');
-          break;
-        default:
-          router.push('/associate/dashboard');
-          break;
-      }
-      
+      router.push(getPortalForUser(userData));
+      return userData;
     } catch (error) {
       console.error('Login failed:', error);
+      throw error;
+    }
+  };
+
+  const signup = async (empId: string, email: string, password: string): Promise<User> => {
+    try {
+      const response = await api.post('/auth/signup', { empId, email, password });
+      const data = response.data?.data || response.data;
+      const userData = processAuthResponse(data);
+
+      router.push(getPortalForUser(userData));
+      return userData;
+    } catch (error) {
+      console.error('Signup failed:', error);
       throw error;
     }
   };
@@ -91,11 +143,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
     setUser(null);
-    router.push('/login');
+    router.replace('/login');
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, signup, logout }}>
       {children}
     </AuthContext.Provider>
   );

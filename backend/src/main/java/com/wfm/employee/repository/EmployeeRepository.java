@@ -15,34 +15,40 @@ import java.util.Optional;
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
     Optional<Employee> findByEmail(String email);
-    Optional<Employee> findByEmployeeCode(String employeeCode);
+    Optional<Employee> findByEmpId(String empId);
     boolean existsByEmail(String email);
-    boolean existsByEmployeeCode(String employeeCode);
+    boolean existsByEmpId(String empId);
 
-    List<Employee> findByIsActiveTrue();
-    List<Employee> findByRole_CodeAndIsActiveTrue(String roleCode);
+    List<Employee> findByStatus(String status);
+    List<Employee> findByDesignationAndStatus(String designation, String status);
 
-    Page<Employee> findByIsActiveTrue(Pageable pageable);
+    Page<Employee> findByStatus(String status, Pageable pageable);
 
     @Query("""
         SELECT e FROM Employee e
-        WHERE e.isActive = true
-          AND e.role.code = :roleCode
-        ORDER BY e.lastName, e.firstName
+        WHERE e.status = 'Active'
+          AND e.designation = :designation
+        ORDER BY e.name
         """)
-    List<Employee> findActiveByRole(@Param("roleCode") String roleCode);
+    List<Employee> findActiveByDesignation(@Param("designation") String designation);
 
     @Query("""
         SELECT e FROM Employee e
-        JOIN e.role r
-        WHERE e.isActive = true
-          AND (:roleCode IS NULL OR r.code = :roleCode)
-          AND (:search IS NULL OR LOWER(e.firstName) LIKE LOWER(CONCAT('%', :search, '%'))
-               OR LOWER(e.lastName) LIKE LOWER(CONCAT('%', :search, '%'))
-               OR LOWER(e.employeeCode) LIKE LOWER(CONCAT('%', :search, '%')))
+        WHERE e.status = 'Active'
+          AND (:designation IS NULL OR e.designation = :designation)
+          AND (:search IS NULL OR LOWER(e.name) LIKE LOWER(CONCAT('%', :search, '%'))
+               OR LOWER(e.empId) LIKE LOWER(CONCAT('%', :search, '%')))
         """)
     Page<Employee> searchEmployees(
-            @Param("roleCode") String roleCode,
+            @Param("designation") String designation,
             @Param("search") String search,
             Pageable pageable);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @Query("UPDATE Employee e SET e.status = 'Inactive' WHERE e.designation != 'Senior Manager'")
+    void markNonSeniorManagerAsInactive();
+
+    /** Find all employees who report to a given manager (by emp_id). */
+    List<Employee> findByManager1EmpIdAndStatus(String managerEmpId, String status);
+    List<Employee> findByManager2EmpIdAndStatus(String managerEmpId, String status);
 }

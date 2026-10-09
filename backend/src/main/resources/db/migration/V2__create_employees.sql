@@ -1,33 +1,48 @@
 -- V2: Create employees table
 CREATE TABLE employees (
     id                 BIGSERIAL PRIMARY KEY,
-    employee_code      VARCHAR(50)  NOT NULL UNIQUE,
-    first_name         VARCHAR(100) NOT NULL,
-    last_name          VARCHAR(100) NOT NULL,
+    
+    -- Fields from requested schema
+    emp_id             VARCHAR(50)  NOT NULL UNIQUE,
+    name               VARCHAR(200) NOT NULL,
+    gender             VARCHAR(10),  -- M/F/U
+    emp_type           VARCHAR(50),  -- Full Timer / Contractual
+    designation        VARCHAR(100), -- Support, Advisor
+    joining_date       DATE,
+    modification_date  DATE,
+    
+    manager1_emp_id    VARCHAR(50),
+    manager1_name      VARCHAR(200),
+    manager2_emp_id    VARCHAR(50),
+    manager2_name      VARCHAR(200),
+    manager3_emp_id    VARCHAR(50),
+    manager3_name      VARCHAR(200),
+    manager4_emp_id    VARCHAR(50),
+    manager4_name      VARCHAR(200),
+    
+    country            VARCHAR(100),
+    location           VARCHAR(100),
+    center             VARCHAR(100),
+    status             VARCHAR(50) DEFAULT 'Active', -- Active/Inactive
+    lob                VARCHAR(100), -- Line of Business
+    channel            VARCHAR(100), -- BO/Voice/Chat/Email/Blended
+    skill              VARCHAR(255),
+    agent_status       VARCHAR(100), -- Support, Production, OJT, Training
+    mode_of_work       VARCHAR(50),  -- WFO, WFH
+    
+    -- Essential App/Auth Fields (Retained for system to work)
     email              VARCHAR(255) NOT NULL UNIQUE,
-    phone              VARCHAR(20),
     password_hash      VARCHAR(255) NOT NULL,
     role_id            BIGINT       NOT NULL REFERENCES roles(id),
-    employment_status  VARCHAR(30)  NOT NULL DEFAULT 'ACTIVE',
-    -- ACTIVE | ON_NOTICE | TERMINATED | ON_LEAVE
-    employment_type    VARCHAR(30)  NOT NULL DEFAULT 'FULL_TIME',
-    -- FULL_TIME | PART_TIME | CONTRACT
-    date_of_joining    DATE         NOT NULL,
-    last_working_date  DATE,
-    location           VARCHAR(100),
-    gender             VARCHAR(10),
-    is_active          BOOLEAN      NOT NULL DEFAULT TRUE,
     last_login_at      TIMESTAMPTZ,
     created_at         TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
     updated_at         TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_employees_code           ON employees(employee_code);
-CREATE INDEX idx_employees_role_id        ON employees(role_id);
-CREATE INDEX idx_employees_is_active      ON employees(is_active);
-CREATE INDEX idx_employees_email          ON employees(email);
-CREATE INDEX idx_employees_employment_status ON employees(employment_status);
+CREATE INDEX idx_employees_emp_id     ON employees(emp_id);
+CREATE INDEX idx_employees_role_id    ON employees(role_id);
+CREATE INDEX idx_employees_status     ON employees(status);
+CREATE INDEX idx_employees_email      ON employees(email);
+CREATE INDEX idx_employees_lob        ON employees(lob);
+CREATE INDEX idx_employees_location   ON employees(location);
 
-COMMENT ON TABLE employees IS 'Core employee master. Skills, eligibility, preferences, leave stored in separate tables.';
-COMMENT ON COLUMN employees.employment_status IS 'ACTIVE | ON_NOTICE | TERMINATED | ON_LEAVE';
-COMMENT ON COLUMN employees.employment_type   IS 'FULL_TIME | PART_TIME | CONTRACT';

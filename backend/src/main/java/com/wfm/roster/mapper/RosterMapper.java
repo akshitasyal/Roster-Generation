@@ -8,9 +8,12 @@ import org.mapstruct.ReportingPolicy;
 public interface RosterMapper {
     @Mapping(target = "rosterVersionId", source = "rosterVersion.id")
     @Mapping(target = "employeeId", source = "employee.id")
+    @Mapping(target = "employeeName", source = "employee.name")
+    @Mapping(target = "employeeCode", source = "employee.empId")
     @Mapping(target = "projectId", source = "project.id")
     @Mapping(target = "teamId", source = "team.id")
     @Mapping(target = "shiftId", source = "shift.id")
+    @Mapping(target = "shiftCode", source = "shift.shiftCode")
     RosterAssignmentDTO toAssignmentDto(RosterAssignment entity);
 
     @Mapping(target = "rosterVersionId", source = "rosterVersion.id")

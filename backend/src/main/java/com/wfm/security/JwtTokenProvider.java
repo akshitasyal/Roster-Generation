@@ -41,9 +41,7 @@ public class JwtTokenProvider {
      */
     public String generateToken(WfmUserPrincipal userPrincipal) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("id", userPrincipal.getId());
-        claims.put("employeeCode", userPrincipal.getEmployeeCode());
-        claims.put("role", userPrincipal.getRoleCode());
+        claims.put("empId", userPrincipal.getEmpId());
         claims.put("type", "ACCESS");
         return buildToken(claims, userPrincipal.getUsername(), jwtExpirationMs);
     }

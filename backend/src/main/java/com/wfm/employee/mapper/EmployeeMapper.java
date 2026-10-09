@@ -8,10 +8,12 @@ import org.mapstruct.ReportingPolicy;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface EmployeeMapper {
-    @Mapping(target = "roleId", source = "role.id")
-    @Mapping(target = "roleCode", source = "role.code")
+    @Mapping(target = "employeeCode", source = "empId")
+    @Mapping(target = "firstName", source = "name")
+    @Mapping(target = "dateOfJoining", source = "joiningDate")
+    @Mapping(target = "employmentStatus", source = "status")
+    @Mapping(target = "isActive", expression = "java(\"Active\".equalsIgnoreCase(entity.getStatus()))")
     EmployeeDTO toDto(Employee entity);
 
-    @Mapping(target = "role", ignore = true)
     Employee toEntity(EmployeeDTO dto);
 }

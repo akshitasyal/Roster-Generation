@@ -14,15 +14,16 @@ INSERT INTO skill_levels (level_code, level_weight, description) VALUES
 ('ADVANCED', 3, 'High proficiency'),
 ('EXPERT', 4, 'Subject matter expert');
 
--- Upgrade employee_skills to use skill_level_id
-ALTER TABLE employee_skills ADD COLUMN skill_level_id BIGINT;
-UPDATE employee_skills es SET skill_level_id = sl.id FROM skill_levels sl WHERE UPPER(es.skill_level) = sl.level_code;
-ALTER TABLE employee_skills ALTER COLUMN skill_level_id SET NOT NULL;
-ALTER TABLE employee_skills ADD CONSTRAINT fk_employee_skills_level FOREIGN KEY (skill_level_id) REFERENCES skill_levels(id);
-ALTER TABLE employee_skills DROP COLUMN skill_level;
-
 -- Upgrade demand to include skill_level_id
 ALTER TABLE demand ADD COLUMN skill_level_id BIGINT REFERENCES skill_levels(id);
+
+-- Upgrade employee_skills to use skill_level_id
+ALTER TABLE employee_skills ADD COLUMN skill_level_id BIGINT REFERENCES skill_levels(id);
+UPDATE employee_skills SET skill_level_id = (SELECT id FROM skill_levels WHERE level_code = skill_level);
+-- Since there are some nulls, wait, if any fail, give them default
+UPDATE employee_skills SET skill_level_id = 1 WHERE skill_level_id IS NULL;
+ALTER TABLE employee_skills ALTER COLUMN skill_level_id SET NOT NULL;
+ALTER TABLE employee_skills DROP COLUMN skill_level;
 
 
 -- 2. Shift Interval Coverage Model
@@ -53,7 +54,8 @@ INSERT INTO shift_patterns (pattern_code, pattern_type, description) VALUES
 ('NIGHT_ONLY', 'NIGHT_ONLY', 'Only allowed on night shifts'),
 ('ROTATIONAL_WEEKLY', 'ROTATIONAL', 'Rotates day/night weekly');
 
--- Assign pattern to employee project assignments (or employee_org_assignments)
+-- Assign pattern to employee directly
+ALTER TABLE employees ADD COLUMN shift_pattern_id BIGINT REFERENCES shift_patterns(id);
 ALTER TABLE employee_org_assignments ADD COLUMN shift_pattern_id BIGINT REFERENCES shift_patterns(id);
 
 
@@ -88,20 +90,6 @@ INSERT INTO optimization_weights (objective_key, weight_value, description) VALU
 ('WEIGHT_PREFERENCE', 100, 'Reward for honoring shift preferences'),
 ('WEIGHT_WEEKLY_OFF_PREF', 150, 'Reward for honoring weekly off preference'),
 ('WEIGHT_OVERTIME', -50, 'Penalty for overtime');
-
-
--- 6. Management Coverage Requirements (Explicit Table)
-CREATE TABLE management_coverage_requirements (
-    id             BIGSERIAL PRIMARY KEY,
-    project_id     BIGINT NOT NULL REFERENCES projects(id),
-    role_id        BIGINT NOT NULL REFERENCES roles(id),
-    shift_id       BIGINT NOT NULL REFERENCES shifts(id),
-    min_required   INT    NOT NULL DEFAULT 1,
-    effective_from DATE   NOT NULL,
-    effective_to   DATE,
-    
-    CONSTRAINT uq_mgmt_coverage UNIQUE (project_id, role_id, shift_id, effective_from)
-);
 
 
 -- 7. Preference Reviews Workflow

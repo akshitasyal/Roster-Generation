@@ -4,7 +4,6 @@ import com.wfm.employee.dto.EmployeeDTO;
 import com.wfm.employee.entity.Employee;
 import com.wfm.employee.mapper.EmployeeMapper;
 import com.wfm.employee.repository.EmployeeRepository;
-import com.wfm.organization.repository.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +14,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class EmployeeServiceImpl implements EmployeeService {
     private final EmployeeRepository employeeRepository;
-    private final RoleRepository roleRepository;
     private final EmployeeMapper employeeMapper;
 
     @Override
@@ -38,11 +36,6 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Transactional
     public EmployeeDTO createEmployee(EmployeeDTO dto) {
         Employee employee = employeeMapper.toEntity(dto);
-        employee.setPasswordHash("temp_hash"); // In real app, generate random password and hash it
-        if (dto.getRoleId() != null) {
-            employee.setRole(roleRepository.findById(dto.getRoleId())
-                    .orElseThrow(() -> new RuntimeException("Role not found")));
-        }
         return employeeMapper.toDto(employeeRepository.save(employee));
     }
 
@@ -52,15 +45,11 @@ public class EmployeeServiceImpl implements EmployeeService {
         Employee existing = employeeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Employee not found"));
         
-        existing.setFirstName(dto.getFirstName());
-        existing.setLastName(dto.getLastName());
-        existing.setPhone(dto.getPhone());
-        existing.setEmploymentStatus(dto.getEmploymentStatus());
-        existing.setIsActive(dto.getIsActive());
-        
-        if (dto.getRoleId() != null && (existing.getRole() == null || !existing.getRole().getId().equals(dto.getRoleId()))) {
-            existing.setRole(roleRepository.findById(dto.getRoleId())
-                    .orElseThrow(() -> new RuntimeException("Role not found")));
+        if (dto.getFirstName() != null) {
+            existing.setName(dto.getFirstName());
+        }
+        if (dto.getIsActive() != null) {
+            existing.setStatus(dto.getIsActive() ? "Active" : "Inactive");
         }
         
         return employeeMapper.toDto(employeeRepository.save(existing));

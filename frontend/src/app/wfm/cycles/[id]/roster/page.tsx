@@ -79,13 +79,32 @@ export default function CycleRosterPage() {
                   <tr>
                     <td colSpan={8} className="p-8 text-center text-slate-500 font-medium">Loading generated roster...</td>
                   </tr>
-                ) : employees.map((emp, empIdx) => (
-                  <tr key={empIdx} className="hover:bg-slate-50 transition-colors">
+                ) : assignments.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="p-8 text-center text-slate-500 font-medium">No roster assignments generated. (Solver might be infeasible or cycle has no generated roster)</td>
+                  </tr>
+                ) : Object.entries(
+                  assignments.reduce((acc, curr) => {
+                    if (!acc[curr.employeeId]) {
+                      acc[curr.employeeId] = { id: curr.employeeCode, name: curr.employeeName, shifts: Array(7).fill('OFF'), locked: Array(7).fill(false) };
+                    }
+                    // Simple day index based on date string or just sequential for demo
+                    // A proper implementation would map curr.date to the specific day column
+                    const dateObj = new Date(curr.date);
+                    const dayIdx = dateObj.getDay() === 0 ? 6 : dateObj.getDay() - 1; // Mon=0..Sun=6
+                    if (dayIdx >= 0 && dayIdx <= 6) {
+                      acc[curr.employeeId].shifts[dayIdx] = curr.shiftCode || 'OFF';
+                      acc[curr.employeeId].locked[dayIdx] = curr.locked || false;
+                    }
+                    return acc;
+                  }, {})
+                ).map(([empId, emp]: [string, any], empIdx) => (
+                  <tr key={empId} className="hover:bg-slate-50 transition-colors">
                     <td className="p-3 border-r border-wfm-border sticky left-0 bg-white z-10 shadow-[1px_0_0_0_#e2e8f0]">
                       <div className="font-semibold text-slate-800">{emp.name}</div>
                       <div className="text-[10px] text-slate-500 font-mono">{emp.id}</div>
                     </td>
-                    {emp.shifts.map((shift, dayIdx) => {
+                    {emp.shifts.map((shift: string, dayIdx: number) => {
                       const isLocked = emp.locked[dayIdx];
                       const isSelected = selectedCell?.empIdx === empIdx && selectedCell?.dayIdx === dayIdx;
                       

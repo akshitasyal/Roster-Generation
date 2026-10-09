@@ -76,7 +76,7 @@ public interface EmployeeOrgAssignmentRepository extends JpaRepository<EmployeeO
     @Query("""
         SELECT a FROM EmployeeOrgAssignment a
         WHERE a.reportsTo.id = :amId
-          AND a.employee.role.code = 'TL'
+          AND (a.employee.designation = 'Team Lead' OR a.employee.designation = 'TL')
           AND a.isPrimary = true
           AND a.effectiveFrom <= :date
           AND (a.effectiveTo IS NULL OR a.effectiveTo >= :date)

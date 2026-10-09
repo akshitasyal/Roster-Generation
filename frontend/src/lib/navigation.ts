@@ -134,8 +134,10 @@ export const NAVIGATION_CONFIG: NavSection[] = [
     items: [
       { label: 'Dashboard', href: '/associate/dashboard', icon: LayoutDashboard },
       { label: 'My Roster', href: '/associate/roster', icon: Calendar },
-      { label: 'Preferences', href: '/associate/preferences', icon: Settings },
-      { label: 'My Leaves', href: '/associate/leaves', icon: UserCircle },
+      { label: 'Submit Preferences', href: '/associate/preferences', icon: Settings },
+      { label: 'My Leaves', href: '/associate/leaves', icon: FileCheck2 },
+      { label: 'Profile', href: '/associate/profile', icon: UserCircle },
+      { label: 'Help & Support', href: '/associate/support', icon: AlertCircle },
     ],
   },
 ];

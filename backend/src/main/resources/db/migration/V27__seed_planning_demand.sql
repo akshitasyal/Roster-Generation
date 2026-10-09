@@ -14,7 +14,7 @@ SELECT
     '2026-10-01 10:00:00+05:30',
     wfm.id
 FROM projects p, employees wfm
-WHERE p.project_code = 'ACME-CS-01' AND wfm.employee_code = 'WFM001';
+WHERE p.project_code = 'ACME-CS-01' AND wfm.emp_id = 'WFM001';
 
 -- ============================================================
 -- EMPLOYEE SHIFT PREFERENCES for this cycle
@@ -23,39 +23,39 @@ WHERE p.project_code = 'ACME-CS-01' AND wfm.employee_code = 'WFM001';
 INSERT INTO employee_preferences (employee_id, planning_cycle_id, preferred_shift_id, preference_rank)
 SELECT e.id, pc.id, s.id, 1
 FROM employees e, planning_cycles pc, shifts s
-WHERE e.employee_code IN ('E001','E002','E003','E004','E005','E006')
+WHERE e.emp_id IN ('E001','E002','E003','E004','E005','E006')
   AND pc.cycle_name = 'Week 41 - Oct 05-11 2026' AND s.shift_code = 'M';
 
 INSERT INTO employee_preferences (employee_id, planning_cycle_id, preferred_shift_id, preference_rank)
 SELECT e.id, pc.id, s.id, 1
 FROM employees e, planning_cycles pc, shifts s
-WHERE e.employee_code IN ('E007','E008')
+WHERE e.emp_id IN ('E007','E008')
   AND pc.cycle_name = 'Week 41 - Oct 05-11 2026' AND s.shift_code = 'M';
 
 -- Team B prefers General
 INSERT INTO employee_preferences (employee_id, planning_cycle_id, preferred_shift_id, preference_rank)
 SELECT e.id, pc.id, s.id, 1
 FROM employees e, planning_cycles pc, shifts s
-WHERE e.employee_code IN ('E009','E010','E011','E012')
+WHERE e.emp_id IN ('E009','E010','E011','E012')
   AND pc.cycle_name = 'Week 41 - Oct 05-11 2026' AND s.shift_code = 'G';
 
 INSERT INTO employee_preferences (employee_id, planning_cycle_id, preferred_shift_id, preference_rank)
 SELECT e.id, pc.id, s.id, 1
 FROM employees e, planning_cycles pc, shifts s
-WHERE e.employee_code IN ('E013','E014','E015','E016')
+WHERE e.emp_id IN ('E013','E014','E015','E016')
   AND pc.cycle_name = 'Week 41 - Oct 05-11 2026' AND s.shift_code = 'E';
 
 -- Team C prefers Evening
 INSERT INTO employee_preferences (employee_id, planning_cycle_id, preferred_shift_id, preference_rank)
 SELECT e.id, pc.id, s.id, 1
 FROM employees e, planning_cycles pc, shifts s
-WHERE e.employee_code IN ('E017','E018','E019','E020','E021')
+WHERE e.emp_id IN ('E017','E018','E019','E020','E021')
   AND pc.cycle_name = 'Week 41 - Oct 05-11 2026' AND s.shift_code = 'E';
 
 INSERT INTO employee_preferences (employee_id, planning_cycle_id, preferred_shift_id, preference_rank)
 SELECT e.id, pc.id, s.id, 1
 FROM employees e, planning_cycles pc, shifts s
-WHERE e.employee_code IN ('E022','E023','E024','E025')
+WHERE e.emp_id IN ('E022','E023','E024','E025')
   AND pc.cycle_name = 'Week 41 - Oct 05-11 2026' AND s.shift_code = 'G';
 
 -- Weekly-off preferences (prefer Sat + Sun off)
@@ -63,7 +63,7 @@ INSERT INTO weekly_off_preferences (employee_id, planning_cycle_id, day_of_week,
 SELECT e.id, pc.id, dow, rank
 FROM employees e, planning_cycles pc,
      (VALUES ('SATURDAY', 1), ('SUNDAY', 2)) AS v(dow, rank)
-WHERE e.employee_code IN (
+WHERE e.emp_id IN (
     'E001','E002','E003','E004','E005','E006','E007','E008',
     'E009','E010','E011','E012','E013','E014','E015','E016'
 ) AND pc.cycle_name = 'Week 41 - Oct 05-11 2026';
@@ -72,7 +72,7 @@ INSERT INTO weekly_off_preferences (employee_id, planning_cycle_id, day_of_week,
 SELECT e.id, pc.id, dow, rank
 FROM employees e, planning_cycles pc,
      (VALUES ('FRIDAY', 1), ('SATURDAY', 2)) AS v(dow, rank)
-WHERE e.employee_code IN (
+WHERE e.emp_id IN (
     'E017','E018','E019','E020','E021','E022','E023','E024','E025'
 ) AND pc.cycle_name = 'Week 41 - Oct 05-11 2026';
 

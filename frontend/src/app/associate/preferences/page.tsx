@@ -1,141 +1,255 @@
 'use client';
 
 import { useState } from 'react';
-import { Save, AlertCircle } from 'lucide-react';
+import { Calendar, Clock, Info, ChevronDown } from 'lucide-react';
 
 export default function PreferencesPage() {
-  const [step, setStep] = useState(1);
-  const deadlineDays = 2;
+  const [activeTab, setActiveTab] = useState('shift');
   
+  // Mock state for the radio buttons
+  const [preferences, setPreferences] = useState<Record<string, string>>({
+    'Mon': 'S1',
+    'Tue': 'S1',
+    'Wed': 'S2',
+    'Thu': 'S2',
+    'Fri': 'S1',
+    'Sat': 'NotAvailable',
+    'Sun': 'NotAvailable',
+  });
+
+  const [weekoffPrefs, setWeekoffPrefs] = useState<Record<string, string>>({
+    'Mon': 'Available',
+    'Tue': 'Available',
+    'Wed': 'Available',
+    'Thu': 'Available',
+    'Fri': 'Available',
+    'Sat': 'Primary',
+    'Sun': 'Primary',
+  });
+
+  const handleSelect = (day: string, shift: string) => {
+    setPreferences(prev => ({ ...prev, [day]: shift }));
+  };
+
+  const handleWeekoffSelect = (day: string, type: string) => {
+    setWeekoffPrefs(prev => ({ ...prev, [day]: type }));
+  };
+
+  const days = [
+    { name: 'Monday', short: 'Mon', date: '06 Oct' },
+    { name: 'Tuesday', short: 'Tue', date: '07 Oct' },
+    { name: 'Wednesday', short: 'Wed', date: '08 Oct' },
+    { name: 'Thursday', short: 'Thu', date: '09 Oct' },
+    { name: 'Friday', short: 'Fri', date: '10 Oct' },
+    { name: 'Saturday', short: 'Sat', date: '11 Oct' },
+    { name: 'Sunday', short: 'Sun', date: '12 Oct' },
+  ];
+
   return (
-    <div className="space-y-6 animate-fade-in max-w-4xl mx-auto">
-      <div>
-        <h1 className="text-2xl font-bold text-white tracking-tight">Shift & Roster Preferences</h1>
-        <p className="text-slate-400">Submit your preferences for the upcoming planning cycle (Oct 12 - Oct 18).</p>
-      </div>
+    <div className="space-y-6 max-w-6xl mx-auto p-4 md:p-8 animate-fade-in text-slate-800 bg-[#f9fafb] min-h-screen">
       
-      {/* Deadline Notice */}
-      <div className="flex items-center gap-4 p-4 rounded-xl bg-warning/10 border border-warning/20 text-warning">
-        <AlertCircle className="w-5 h-5 flex-shrink-0" />
-        <div className="flex-1">
-          <p className="font-semibold text-sm">Submission Deadline Approaching</p>
-          <p className="text-xs opacity-90 mt-0.5">You have {deadlineDays} days left to submit or modify your preferences for the next cycle.</p>
-        </div>
-      </div>
-      
-      <div className="glass-card p-0 overflow-hidden border-wfm-border/50">
-        <div className="flex border-b border-wfm-border">
-          <StepButton number={1} title="Preferred Shifts" active={step === 1} onClick={() => setStep(1)} />
-          <StepButton number={2} title="Weekly Off" active={step === 2} onClick={() => setStep(2)} />
-          <StepButton number={3} title="Availability" active={step === 3} onClick={() => setStep(3)} />
+      {/* Header Section */}
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Submit Preferences</h1>
+          <p className="text-slate-500 text-sm mt-1">Select your preferred shifts and week-off for the next planning period.</p>
         </div>
         
-        <div className="p-6 md:p-8">
-          {step === 1 && (
-            <div className="space-y-6 animate-fade-in">
-              <h2 className="text-lg font-semibold text-white">Rank your preferred shifts</h2>
-              <p className="text-sm text-slate-400">Drag and drop to reorder. WFM will attempt to honor your highest ranked shift.</p>
-              
-              <div className="space-y-3 mt-6">
-                <RankRow rank={1} label="Morning (09:00 - 18:00)" />
-                <RankRow rank={2} label="General (11:00 - 20:00)" />
-                <RankRow rank={3} label="Evening (14:00 - 23:00)" />
-                <RankRow rank={4} label="Night (21:00 - 06:00)" />
-              </div>
+        <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
+          {/* Preference Window Widget */}
+          <div className="flex items-center gap-3 bg-white border border-slate-200 rounded-xl px-4 py-3 shadow-sm w-full sm:w-auto">
+            <div className="bg-slate-50 p-2 rounded-lg border border-slate-200">
+              <Calendar className="w-5 h-5 text-slate-600" />
             </div>
-          )}
+            <div>
+              <div className="text-xs font-bold text-slate-900">Preference Window</div>
+              <div className="text-xs text-slate-500 mt-0.5">29 Sep 2025 - 05 Oct 2025</div>
+            </div>
+          </div>
           
-          {step === 2 && (
-            <div className="space-y-6 animate-fade-in">
-              <h2 className="text-lg font-semibold text-white">Select preferred weekly off combination</h2>
-              <p className="text-sm text-slate-400">Select your primary and alternative weekly off preference.</p>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
-                <div className="p-4 rounded-xl border-2 border-brand-primary bg-brand-primary/5 cursor-pointer">
-                  <div className="text-xs font-bold text-brand-primary mb-2 uppercase tracking-wider">Primary Choice</div>
-                  <div className="text-lg font-bold text-white mb-1">Saturday + Sunday</div>
-                  <div className="text-xs text-slate-400">Standard weekend off</div>
-                </div>
-                <div className="p-4 rounded-xl border border-wfm-border hover:border-brand-primary/50 bg-wfm-panel cursor-pointer transition-colors">
-                  <div className="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">Alternative Choice</div>
-                  <div className="text-lg font-bold text-white mb-1">Friday + Saturday</div>
-                  <div className="text-xs text-slate-400">Middle-eastern weekend off</div>
-                </div>
-              </div>
+          {/* Deadline Widget */}
+          <div className="flex items-center gap-3 bg-white border border-red-200 rounded-xl px-4 py-3 shadow-sm w-full sm:w-auto">
+            <div className="bg-red-50 p-2 rounded-lg border border-red-100">
+              <Clock className="w-5 h-5 text-red-500" />
             </div>
-          )}
-          
-          {step === 3 && (
-            <div className="space-y-6 animate-fade-in">
-              <h2 className="text-lg font-semibold text-white">Review & Submit</h2>
-              <p className="text-sm text-slate-400">By submitting, your TL will review your preferences. If no action is taken before the deadline, they will be auto-accepted.</p>
-              
-              <div className="bg-wfm-dark p-6 rounded-xl border border-wfm-border mt-6 space-y-4">
-                <div className="flex justify-between border-b border-wfm-border pb-4">
-                  <span className="text-slate-400 font-medium">Status</span>
-                  <span className="px-3 py-1 bg-wfm-panel rounded-full text-xs font-bold text-slate-300">DRAFT</span>
-                </div>
-                <div className="flex justify-between border-b border-wfm-border pb-4">
-                  <span className="text-slate-400 font-medium">Top Shift Preference</span>
-                  <span className="text-white font-semibold">Morning</span>
-                </div>
-                <div className="flex justify-between pb-2">
-                  <span className="text-slate-400 font-medium">Primary Weekly Off</span>
-                  <span className="text-white font-semibold">Saturday + Sunday</span>
-                </div>
-              </div>
+            <div>
+              <div className="text-xs font-bold text-red-500">Deadline</div>
+              <div className="text-xs font-bold text-red-500 mt-0.5">Tue, 23 Sep 2025<br/>11:00 AM</div>
             </div>
-          )}
+          </div>
+        </div>
+      </div>
+
+      {/* Selectors and Info */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-bold text-slate-900 mb-2">Select Week</label>
+            <div className="relative">
+              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+              <select className="w-full pl-9 pr-10 py-2.5 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 shadow-sm appearance-none focus:outline-none focus:ring-1 focus:ring-slate-300">
+                <option>06 Oct 2025 - 12 Oct 2025</option>
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-slate-900 mb-2">Select Project (Optional)</label>
+            <div className="relative">
+              <select className="w-full pl-3 pr-10 py-2.5 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 shadow-sm appearance-none focus:outline-none focus:ring-1 focus:ring-slate-300">
+                <option>All Projects</option>
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
+            </div>
+          </div>
         </div>
         
-        <div className="p-6 border-t border-wfm-border bg-wfm-card flex justify-between items-center">
+        <div className="flex items-start gap-3 bg-blue-50/50 border border-blue-100 p-4 rounded-xl">
+          <Info className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-blue-800">
+            Your preferences will be considered while creating the roster. Final shifts are subject to business requirements.
+          </p>
+        </div>
+      </div>
+
+      {/* Main Content Area */}
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        
+        {/* Tabs */}
+        <div className="flex items-center gap-6 px-6 border-b border-slate-200">
           <button 
-            disabled={step === 1} 
-            onClick={() => setStep(s => s - 1)}
-            className="btn-secondary px-6"
+            onClick={() => setActiveTab('shift')}
+            className={`py-4 border-b-2 text-sm transition-colors ${activeTab === 'shift' ? 'border-red-500 font-bold text-slate-900' : 'border-transparent font-medium text-slate-500 hover:text-slate-700'}`}
           >
-            Back
+            Shift Preferences
           </button>
-          
-          {step < 3 ? (
-            <button 
-              onClick={() => setStep(s => s + 1)}
-              className="btn-primary px-8"
-            >
-              Continue
-            </button>
-          ) : (
-            <button className="btn-primary px-8 gap-2">
-              <Save className="w-4 h-4" /> Submit Preferences
-            </button>
-          )}
+          <button 
+            onClick={() => setActiveTab('weekoff')}
+            className={`py-4 border-b-2 text-sm transition-colors ${activeTab === 'weekoff' ? 'border-red-500 font-bold text-slate-900' : 'border-transparent font-medium text-slate-500 hover:text-slate-700'}`}
+          >
+            Week-off Preferences
+          </button>
+        </div>
+
+        {/* Tab Content: Shift Preferences */}
+        {activeTab === 'shift' && (
+          <div className="p-6">
+            <h2 className="text-sm font-bold text-slate-900 mb-4">Select your preferred shift for each day</h2>
+            
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm min-w-[800px]">
+                <thead>
+                  <tr className="border-b border-slate-100">
+                    <th className="font-bold text-slate-800 py-3 px-2 w-[15%]">Day</th>
+                    <th className="font-bold text-slate-800 py-3 px-2 w-[15%]">Date</th>
+                    <th className="font-bold text-slate-800 py-3 px-2 w-[45%]">Shift Options (Select in order of preference)</th>
+                    <th className="font-bold text-slate-800 py-3 px-2 w-[25%]">Remarks (Optional)</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {days.map((day) => (
+                    <tr key={day.short} className="hover:bg-slate-50/30 transition-colors">
+                      <td className="py-4 px-2 font-medium text-slate-700">{day.name}</td>
+                      <td className="py-4 px-2 text-slate-600">{day.date}</td>
+                      <td className="py-4 px-2">
+                        <div className="flex items-center gap-6">
+                          <label className="flex items-center gap-2 cursor-pointer group">
+                            <div className={`w-4 h-4 rounded-full border-[5px] transition-colors ${preferences[day.short] === 'S1' ? 'border-blue-600 bg-white' : 'border-slate-300 bg-white group-hover:border-blue-300'}`}></div>
+                            <input type="radio" name={`shift-${day.short}`} className="hidden" checked={preferences[day.short] === 'S1'} onChange={() => handleSelect(day.short, 'S1')} />
+                            <span className="text-slate-600 text-sm whitespace-nowrap">S1 (10:00 - 19:00)</span>
+                          </label>
+                          <label className="flex items-center gap-2 cursor-pointer group">
+                            <div className={`w-4 h-4 rounded-full border-[5px] transition-colors ${preferences[day.short] === 'S2' ? 'border-blue-600 bg-white' : 'border-slate-300 bg-white group-hover:border-blue-300'}`}></div>
+                            <input type="radio" name={`shift-${day.short}`} className="hidden" checked={preferences[day.short] === 'S2'} onChange={() => handleSelect(day.short, 'S2')} />
+                            <span className="text-slate-600 text-sm whitespace-nowrap">S2 (11:00 - 20:00)</span>
+                          </label>
+                          <label className="flex items-center gap-2 cursor-pointer group">
+                            <div className={`w-4 h-4 rounded-full border-[5px] transition-colors ${preferences[day.short] === 'NotAvailable' ? 'border-blue-600 bg-white' : 'border-slate-300 bg-white group-hover:border-blue-300'}`}></div>
+                            <input type="radio" name={`shift-${day.short}`} className="hidden" checked={preferences[day.short] === 'NotAvailable'} onChange={() => handleSelect(day.short, 'NotAvailable')} />
+                            <span className="text-slate-600 text-sm whitespace-nowrap">Not Available</span>
+                          </label>
+                        </div>
+                      </td>
+                      <td className="py-4 px-2">
+                        <input 
+                          type="text" 
+                          placeholder="Add remarks..." 
+                          className="w-full bg-white border border-slate-200 rounded-md px-3 py-1.5 text-sm placeholder:text-slate-400 focus:outline-none focus:border-slate-400 shadow-sm"
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Tab Content: Week-off Preferences */}
+        {activeTab === 'weekoff' && (
+          <div className="p-6">
+            <h2 className="text-sm font-bold text-slate-900 mb-4">Select your preferred week-off days</h2>
+            
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm min-w-[800px]">
+                <thead>
+                  <tr className="border-b border-slate-100">
+                    <th className="font-bold text-slate-800 py-3 px-2 w-[15%]">Day</th>
+                    <th className="font-bold text-slate-800 py-3 px-2 w-[15%]">Date</th>
+                    <th className="font-bold text-slate-800 py-3 px-2 w-[45%]">Week-off Options (Select primary & alternative)</th>
+                    <th className="font-bold text-slate-800 py-3 px-2 w-[25%]">Remarks (Optional)</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {days.map((day) => (
+                    <tr key={day.short} className="hover:bg-slate-50/30 transition-colors">
+                      <td className="py-4 px-2 font-medium text-slate-700">{day.name}</td>
+                      <td className="py-4 px-2 text-slate-600">{day.date}</td>
+                      <td className="py-4 px-2">
+                        <div className="flex items-center gap-6">
+                          <label className="flex items-center gap-2 cursor-pointer group">
+                            <div className={`w-4 h-4 rounded-full border-[5px] transition-colors ${weekoffPrefs[day.short] === 'Primary' ? 'border-blue-600 bg-white' : 'border-slate-300 bg-white group-hover:border-blue-300'}`}></div>
+                            <input type="radio" name={`weekoff-${day.short}`} className="hidden" checked={weekoffPrefs[day.short] === 'Primary'} onChange={() => handleWeekoffSelect(day.short, 'Primary')} />
+                            <span className="text-slate-600 text-sm whitespace-nowrap">Primary Off</span>
+                          </label>
+                          <label className="flex items-center gap-2 cursor-pointer group">
+                            <div className={`w-4 h-4 rounded-full border-[5px] transition-colors ${weekoffPrefs[day.short] === 'Alternative' ? 'border-blue-600 bg-white' : 'border-slate-300 bg-white group-hover:border-blue-300'}`}></div>
+                            <input type="radio" name={`weekoff-${day.short}`} className="hidden" checked={weekoffPrefs[day.short] === 'Alternative'} onChange={() => handleWeekoffSelect(day.short, 'Alternative')} />
+                            <span className="text-slate-600 text-sm whitespace-nowrap">Alternative Off</span>
+                          </label>
+                          <label className="flex items-center gap-2 cursor-pointer group">
+                            <div className={`w-4 h-4 rounded-full border-[5px] transition-colors ${weekoffPrefs[day.short] === 'Available' ? 'border-blue-600 bg-white' : 'border-slate-300 bg-white group-hover:border-blue-300'}`}></div>
+                            <input type="radio" name={`weekoff-${day.short}`} className="hidden" checked={weekoffPrefs[day.short] === 'Available'} onChange={() => handleWeekoffSelect(day.short, 'Available')} />
+                            <span className="text-slate-600 text-sm whitespace-nowrap">Available</span>
+                          </label>
+                        </div>
+                      </td>
+                      <td className="py-4 px-2">
+                        <input 
+                          type="text" 
+                          placeholder="Add remarks..." 
+                          className="w-full bg-white border border-slate-200 rounded-md px-3 py-1.5 text-sm placeholder:text-slate-400 focus:outline-none focus:border-slate-400 shadow-sm"
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Footer Actions */}
+        <div className="p-6 border-t border-slate-100 bg-slate-50 flex justify-end items-center gap-4">
+          <button className="px-6 py-2 bg-white border border-slate-200 text-slate-700 font-bold text-sm rounded-lg hover:bg-slate-50 transition-colors shadow-sm">
+            Reset
+          </button>
+          <button className="px-6 py-2 bg-[#e31837] text-white font-bold text-sm rounded-lg hover:bg-[#c91530] transition-colors shadow-sm">
+            Submit Preferences
+          </button>
         </div>
       </div>
-    </div>
-  );
-}
 
-function StepButton({ number, title, active, onClick }: { number: number; title: string; active: boolean; onClick: () => void }) {
-  return (
-    <button 
-      onClick={onClick}
-      className={`flex-1 p-4 flex flex-col sm:flex-row items-center justify-center gap-3 transition-colors ${active ? 'bg-wfm-card border-b-2 border-brand-primary' : 'hover:bg-white/[0.02] border-b-2 border-transparent opacity-60'}`}
-    >
-      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${active ? 'bg-brand-primary text-white' : 'bg-wfm-border text-slate-400'}`}>
-        {number}
-      </div>
-      <span className={`font-semibold hidden sm:block ${active ? 'text-brand-primary' : 'text-slate-400'}`}>{title}</span>
-    </button>
-  );
-}
-
-function RankRow({ rank, label }: { rank: number; label: string }) {
-  return (
-    <div className="flex items-center gap-4 p-4 rounded-xl bg-wfm-panel border border-wfm-border cursor-grab active:cursor-grabbing hover:border-brand-primary/50 transition-colors">
-      <div className="w-8 h-8 rounded-lg bg-wfm-dark flex items-center justify-center font-bold text-slate-400 border border-wfm-border">
-        {rank}
-      </div>
-      <span className="font-medium text-white">{label}</span>
     </div>
   );
 }

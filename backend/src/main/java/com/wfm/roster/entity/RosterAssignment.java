@@ -109,8 +109,6 @@ public class RosterAssignment extends BaseEntity {
      * Returns employee role code for type-based queries.
      */
     public String getEmployeeRoleCode() {
-        return employee != null && employee.getRole() != null
-                ? employee.getRole().getCode()
-                : null;
+        return employee != null ? employee.getDesignation() : null;
     }
 }

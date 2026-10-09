@@ -116,14 +116,14 @@ public class PlanningSnapshotBuilder {
         // 5. Load employees via Org Assignments (simplified missing exact JPA method)
         // A real impl would fetch active assignments in the date range.
         List<Employee> activeEmployees = employeeRepo.findAll().stream()
-                .filter(e -> "ASSOCIATE".equals(e.getRoleCode()))
+                .filter(e -> "Associate".equalsIgnoreCase(e.getDesignation()))
                 .collect(Collectors.toList());
         
         List<PlanningSnapshot.EmployeeSnapshot> employeeSnapshots = activeEmployees.stream()
                 .map(e -> PlanningSnapshot.EmployeeSnapshot.builder()
                         .id(e.getId())
-                        .employeeCode(e.getEmployeeCode())
-                        .roleCode(e.getRoleCode())
+                        .employeeCode(e.getEmpId())
+                        .roleCode(e.getDesignation())
                         .build())
                 .collect(Collectors.toList());
         List<Long> employeeIds = activeEmployees.stream().map(Employee::getId).collect(Collectors.toList());
@@ -157,7 +157,7 @@ public class PlanningSnapshotBuilder {
         List<PlanningSnapshot.DemandSnapshot> demandSnapshots = demands.stream()
                 .map(d -> PlanningSnapshot.DemandSnapshot.builder()
                         .date(d.getDate())
-                        .skillId(d.getSkill().getId())
+                        .skillId(d.getSkill() != null ? d.getSkill().getId() : null)
                         .skillLevelWeight(d.getSkillLevel() != null ? d.getSkillLevel().getLevelWeight() : 1)
                         .requiredHeadcount(d.getRequiredHeadcount())
                         .build())

@@ -74,7 +74,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                         // Enrich MDC for structured logging
                         if (userDetails instanceof WfmUserPrincipal principal) {
-                            MDC.put(MDC_EMPLOYEE_KEY, String.valueOf(principal.getId()));
+                            MDC.put(MDC_EMPLOYEE_KEY, principal.getEmpId());
                             MDC.put(MDC_ROLE_KEY, principal.getRoleCode());
                         }
                     }

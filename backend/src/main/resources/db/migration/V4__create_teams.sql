@@ -5,15 +5,15 @@ CREATE TABLE teams (
     team_name       VARCHAR(200) NOT NULL,
     project_id      BIGINT       NOT NULL REFERENCES projects(id),
     tl_employee_id  BIGINT       REFERENCES employees(id),
+    description     TEXT,
     status          VARCHAR(30)  NOT NULL DEFAULT 'ACTIVE',
-    -- ACTIVE | INACTIVE | DISSOLVED
+    -- ACTIVE | INACTIVE | DEPRECATED
     created_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
     updated_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_teams_code        ON teams(team_code);
-CREATE INDEX idx_teams_project_id  ON teams(project_id);
-CREATE INDEX idx_teams_tl_id       ON teams(tl_employee_id);
-CREATE INDEX idx_teams_status      ON teams(status);
+CREATE INDEX idx_teams_code       ON teams(team_code);
+CREATE INDEX idx_teams_project_id ON teams(project_id);
+CREATE INDEX idx_teams_status     ON teams(status);
 
-COMMENT ON TABLE teams IS 'Teams within projects. One team belongs to one project and has a designated TL.';
+COMMENT ON TABLE teams IS 'Sub-units within a project, usually managed by a Team Lead (TL).';

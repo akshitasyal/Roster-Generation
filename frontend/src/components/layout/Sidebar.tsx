@@ -13,6 +13,14 @@ export function Sidebar() {
   
   if (!user) return null;
 
+  const currentRole = user.portalRole || (user.isWfm ? 'WFM' : 'ASSOCIATE');
+
+  const visibleSections = NAVIGATION_CONFIG.filter(section => 
+    section.roles.includes(currentRole) || 
+    (currentRole === 'WFM' && section.roles.includes('WFM')) ||
+    (currentRole === 'EMPLOYEE' && section.roles.includes('ASSOCIATE'))
+  );
+
   return (
     <aside className="w-full md:w-64 flex-shrink-0 flex flex-col z-10 hidden md:flex h-screen" style={{ backgroundColor: 'var(--color-sidebar-bg)' }}>
       {/* Brand Header */}
@@ -24,15 +32,17 @@ export function Sidebar() {
           <div className="text-2xl font-bold tracking-tight text-brand-primary leading-none">
             Mahindra
           </div>
+          <p className="text-[10px] tracking-widest text-slate-400 font-semibold uppercase mt-2">
+            {user.isWfm || user.portalRole === 'WFM' ? 'WFM Control Center' : 'Employee Portal'}
+          </p>
         </Link>
       </div>
       
       {/* Navigation */}
       <div className="flex-1 overflow-y-auto py-2">
-        {NAVIGATION_CONFIG.filter(section => section.roles.includes(user.role)).map((section, idx) => (
+        {visibleSections.map((section, idx) => (
           <div key={section.title} className={idx > 0 ? 'mt-6' : ''}>
-            {/* Show section headers only if there's more than one section (like for WFM) */}
-            {NAVIGATION_CONFIG.filter(s => s.roles.includes(user.role)).length > 1 && section.title !== 'Dashboard' && (
+            {visibleSections.length > 1 && section.title !== 'Dashboard' && (
               <p className="px-6 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
                 {section.title}
               </p>
@@ -66,6 +76,10 @@ export function Sidebar() {
       
       {/* Bottom Profile */}
       <div className="p-4" style={{ borderTop: '1px solid var(--color-sidebar-border)' }}>
+        <div className="mb-3 px-2">
+          <p className="text-xs font-semibold text-white truncate">{user.name}</p>
+          <p className="text-[11px] text-slate-400 truncate">{user.designation || user.empId}</p>
+        </div>
         <button onClick={logout} className="flex items-center gap-3 w-full px-4 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors group">
           <LogOut className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
           <span className="font-medium text-sm">Sign Out</span>

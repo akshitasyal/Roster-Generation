@@ -2,11 +2,12 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { Mail, Lock, ArrowRight, AlertCircle } from 'lucide-react';
+import { Mail, Lock, ArrowRight, AlertCircle, UserPlus } from 'lucide-react';
+import Link from 'next/link';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('Wfm@12345'); // Default seed password
+  const [email, setEmail] = useState('akshitasyal09@techmahindra.com');
+  const [password, setPassword] = useState('wfm@1234'); // Default WFM admin password
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
@@ -19,7 +20,8 @@ export default function LoginPage() {
     try {
       await login(email, password);
     } catch (err: any) {
-      setError(err.data?.message || 'Failed to login. Please check your credentials.');
+      const msg = err.data?.message || err.response?.data?.message || err.message || 'Failed to login. Please check your credentials.';
+      setError(msg);
     } finally {
       setIsLoading(false);
     }
@@ -34,20 +36,20 @@ export default function LoginPage() {
       <div className="w-full max-w-md relative z-10 px-4">
         
         {/* Logo Section */}
-        <div className="flex flex-col items-center mb-10 animate-fade-in">
+        <div className="flex flex-col items-center mb-8 animate-fade-in">
           <div className="text-3xl font-bold tracking-tight text-slate-800 leading-none">
             Tech
           </div>
           <div className="text-3xl font-bold tracking-tight text-brand-primary leading-none">
             Mahindra
           </div>
-          <p className="text-slate-500 font-semibold tracking-widest uppercase text-xs mt-3">Workforce Management</p>
+          <p className="text-slate-500 font-semibold tracking-widest uppercase text-xs mt-3">Workforce Management Portal</p>
         </div>
 
         {/* Login Card */}
         <div className="bg-white p-8 rounded-2xl border border-wfm-border shadow-lg animate-fade-in" style={{ animationDelay: '0.1s' }}>
           
-          <h2 className="text-xl font-bold text-slate-800 mb-6 text-center">Sign in to your account</h2>
+          <h2 className="text-xl font-bold text-slate-800 mb-6 text-center">Sign in to TechM Portal</h2>
           
           {error && (
             <div className="mb-6 p-4 rounded-xl bg-danger/10 border border-danger/20 flex items-start gap-3">
@@ -59,7 +61,7 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-5">
             
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-700">Email Address</label>
+              <label className="text-sm font-semibold text-slate-700">TechM Email Address</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <Mail className="h-5 w-5 text-slate-400" />
@@ -68,8 +70,8 @@ export default function LoginPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-primary/50 focus:border-brand-primary focus:bg-white transition-all"
-                  placeholder="name@techm.com"
+                  className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-primary/50 focus:border-brand-primary focus:bg-white transition-all text-sm"
+                  placeholder="firstname.lastname@techmahindra.com"
                   required
                 />
               </div>
@@ -78,7 +80,6 @@ export default function LoginPage() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-semibold text-slate-700">Password</label>
-                <a href="#" className="text-xs text-brand-primary hover:text-brand-secondary transition-colors font-medium">Forgot password?</a>
               </div>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -88,7 +89,7 @@ export default function LoginPage() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-primary/50 focus:border-brand-primary focus:bg-white transition-all"
+                  className="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-brand-primary/50 focus:border-brand-primary focus:bg-white transition-all text-sm"
                   placeholder="••••••••"
                   required
                 />
@@ -104,21 +105,32 @@ export default function LoginPage() {
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
                 <>
-                  Continue to Dashboard
+                  Sign In
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </>
               )}
             </button>
           </form>
 
+          <div className="mt-6 pt-6 border-t border-slate-100 text-center">
+            <p className="text-sm text-slate-600">
+              First time logging in as a TechM Employee?{' '}
+              <Link href="/signup" className="text-brand-primary hover:underline font-semibold inline-flex items-center gap-1">
+                <UserPlus className="w-3.5 h-3.5" />
+                Sign Up Here
+              </Link>
+            </p>
+          </div>
+
         </div>
         
         {/* Helper text for demo */}
-        <div className="mt-8 text-center animate-fade-in" style={{ animationDelay: '0.2s' }}>
-          <p className="text-xs text-slate-500 font-medium">Test Accounts (Password: Wfm@12345):</p>
-          <div className="flex flex-wrap justify-center gap-4 mt-2 text-xs text-slate-600 font-semibold">
-            <span className="bg-white px-3 py-1 rounded-full border border-slate-200">WFM: ankit.joshi@acme.wfm</span>
-            <span className="bg-white px-3 py-1 rounded-full border border-slate-200">TL: arun.kumar@acme.wfm</span>
+        <div className="mt-6 text-center animate-fade-in" style={{ animationDelay: '0.2s' }}>
+          <p className="text-xs text-slate-500 font-medium">WFM Portal Admin Credentials:</p>
+          <div className="flex flex-col gap-1 mt-2 text-xs text-slate-600 font-semibold items-center">
+            <span className="bg-white px-3 py-1 rounded-full border border-slate-200">Email: akshitasyal09@techmahindra.com</span>
+            <span className="bg-white px-3 py-1 rounded-full border border-slate-200">Password: wfm@1234</span>
+            <span className="text-[11px] text-slate-400 mt-1">Designation: Workforce Manager (Emp ID: TM10001)</span>
           </div>
         </div>
         

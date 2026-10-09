@@ -50,8 +50,8 @@ public class ReplacementServiceImpl implements ReplacementService {
                 candidates.add(ReplacementCandidateDTO.builder()
                     .employeeId(emp.getId())
                     .employeeCode(emp.getEmployeeCode())
-                    .firstName(emp.getFirstName())
-                    .lastName(emp.getLastName())
+                    .firstName(emp.getName())
+                    .lastName("")
                     .restGapHours(14.0) // Mock rest gap calculation
                     .build());
             }

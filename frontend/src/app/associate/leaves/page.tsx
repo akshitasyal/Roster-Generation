@@ -1,124 +1,195 @@
 'use client';
 
-import { Calendar, CheckCircle2, Clock, XCircle } from 'lucide-react';
+import { useState } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-export default function LeavesPage() {
+export default function MyLeavesPage() {
+  const [activeTab, setActiveTab] = useState('history');
+
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-6 max-w-6xl mx-auto p-4 md:p-8 animate-fade-in text-slate-800 bg-[#f9fafb] min-h-screen">
+      
+      {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">My Leaves</h1>
-          <p className="text-slate-400">Manage your leave balances and requests.</p>
+          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">My Leaves</h1>
+          <p className="text-slate-500 text-sm mt-1">View your leave balance, apply for leave, and track your leave history.</p>
         </div>
-        <button className="btn-primary text-sm px-6">Apply Leave</button>
+        <button className="px-6 py-2.5 bg-[#e31837] text-white font-bold text-sm rounded-lg hover:bg-[#c91530] transition-colors shadow-sm whitespace-nowrap">
+          Apply Leave
+        </button>
       </div>
 
-      {/* Leave Balances */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <BalanceCard title="Casual Leave (CL)" balance={5} total={12} color="brand-primary" />
-        <BalanceCard title="Sick Leave (SL)" balance={3} total={10} color="brand-secondary" />
-        <BalanceCard title="Earned Leave (EL)" balance={8} total={15} color="success" />
+      {/* Balance Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+          <span className="text-sm font-semibold text-slate-600">Casual Leave (CL)</span>
+          <span className="text-3xl font-bold text-slate-900 mt-3">8</span>
+          <span className="text-xs font-medium text-slate-500 mt-1">days available</span>
+        </div>
+        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+          <span className="text-sm font-semibold text-slate-600">Sick Leave (SL)</span>
+          <span className="text-3xl font-bold text-slate-900 mt-3">5</span>
+          <span className="text-xs font-medium text-slate-500 mt-1">days available</span>
+        </div>
+        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+          <span className="text-sm font-semibold text-slate-600">Earned Leave (EL)</span>
+          <span className="text-3xl font-bold text-slate-900 mt-3">12</span>
+          <span className="text-xs font-medium text-slate-500 mt-1">days available</span>
+        </div>
+        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+          <span className="text-sm font-semibold text-slate-600">Compensatory Off (CO)</span>
+          <span className="text-3xl font-bold text-slate-900 mt-3">2</span>
+          <span className="text-xs font-medium text-slate-500 mt-1">days available</span>
+        </div>
       </div>
 
-      {/* Leave History */}
-      <div className="glass-card overflow-hidden border-wfm-border/50">
-        <div className="p-5 border-b border-wfm-border bg-wfm-card/50">
-          <h3 className="font-semibold text-white">Leave History</h3>
-        </div>
+      <div className="flex flex-col lg:flex-row gap-6 items-start">
         
-        <div className="w-full overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="bg-wfm-panel/50 border-b border-wfm-border">
-                <th className="p-4 text-xs font-semibold text-slate-400 uppercase">Date Range</th>
-                <th className="p-4 text-xs font-semibold text-slate-400 uppercase">Type</th>
-                <th className="p-4 text-xs font-semibold text-slate-400 uppercase">Duration</th>
-                <th className="p-4 text-xs font-semibold text-slate-400 uppercase">Reason</th>
-                <th className="p-4 text-xs font-semibold text-slate-400 uppercase">Reviewer</th>
-                <th className="p-4 text-xs font-semibold text-slate-400 uppercase text-right">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-wfm-border">
-              <LeaveRow 
-                dates="12 Oct - 13 Oct 2026" 
-                type="Casual Leave" 
-                duration="2 Days" 
-                reason="Personal work" 
-                reviewer="Arun Kumar" 
-                status="Pending" 
-              />
-              <LeaveRow 
-                dates="25 Sep 2026" 
-                type="Sick Leave" 
-                duration="1 Day" 
-                reason="Fever" 
-                reviewer="Arun Kumar" 
-                status="Approved" 
-              />
-              <LeaveRow 
-                dates="10 Aug - 14 Aug 2026" 
-                type="Earned Leave" 
-                duration="5 Days" 
-                reason="Family Trip" 
-                reviewer="Priya Nair" 
-                status="Approved" 
-              />
-            </tbody>
-          </table>
+        {/* Left Side: Tabs and Table */}
+        <div className="flex-1 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden w-full">
+          
+          {/* Tabs */}
+          <div className="flex items-center gap-6 px-6 border-b border-slate-100 overflow-x-auto">
+            <button 
+              onClick={() => setActiveTab('history')}
+              className={`py-4 border-b-2 text-sm whitespace-nowrap transition-colors ${activeTab === 'history' ? 'border-red-500 font-bold text-slate-900' : 'border-transparent font-medium text-slate-500 hover:text-slate-700'}`}
+            >
+              Leave History
+            </button>
+            <button 
+              onClick={() => setActiveTab('pending')}
+              className={`py-4 border-b-2 text-sm whitespace-nowrap transition-colors ${activeTab === 'pending' ? 'border-red-500 font-bold text-slate-900' : 'border-transparent font-medium text-slate-500 hover:text-slate-700'}`}
+            >
+              Pending Requests
+            </button>
+            <button 
+              onClick={() => setActiveTab('approved')}
+              className={`py-4 border-b-2 text-sm whitespace-nowrap transition-colors ${activeTab === 'approved' ? 'border-red-500 font-bold text-slate-900' : 'border-transparent font-medium text-slate-500 hover:text-slate-700'}`}
+            >
+              Approved
+            </button>
+            <button 
+              onClick={() => setActiveTab('rejected')}
+              className={`py-4 border-b-2 text-sm whitespace-nowrap transition-colors ${activeTab === 'rejected' ? 'border-red-500 font-bold text-slate-900' : 'border-transparent font-medium text-slate-500 hover:text-slate-700'}`}
+            >
+              Rejected
+            </button>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm min-w-[750px]">
+              <thead>
+                <tr className="border-b border-slate-100 bg-slate-50/50">
+                  <th className="font-bold text-slate-800 py-4 px-5">From Date</th>
+                  <th className="font-bold text-slate-800 py-4 px-5">To Date</th>
+                  <th className="font-bold text-slate-800 py-4 px-5">Leave Type</th>
+                  <th className="font-bold text-slate-800 py-4 px-5">No. of Days</th>
+                  <th className="font-bold text-slate-800 py-4 px-5">Status</th>
+                  <th className="font-bold text-slate-800 py-4 px-5">Applied On</th>
+                  <th className="font-bold text-slate-800 py-4 px-5">Remarks</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {[
+                  { from: '05 Oct 2025', to: '06 Oct 2025', type: 'Sick Leave', days: '2', status: 'Pending', applied: '01 Oct 2025', remarks: 'Medical appointment' },
+                  { from: '15 Sep 2025', to: '16 Sep 2025', type: 'Casual Leave', days: '2', status: 'Approved', applied: '10 Sep 2025', remarks: 'Personal work' },
+                  { from: '01 Aug 2025', to: '01 Aug 2025', type: 'Sick Leave', days: '1', status: 'Approved', applied: '30 Jul 2025', remarks: 'Fever' },
+                  { from: '12 Jul 2025', to: '14 Jul 2025', type: 'Earned Leave', days: '3', status: 'Approved', applied: '05 Jul 2025', remarks: 'Family function' },
+                  { from: '20 Jun 2025', to: '20 Jun 2025', type: 'Casual Leave', days: '1', status: 'Rejected', applied: '18 Jun 2025', remarks: '-' },
+                  { from: '10 May 2025', to: '12 May 2025', type: 'Earned Leave', days: '3', status: 'Approved', applied: '02 May 2025', remarks: 'Travel' },
+                  { from: '25 Mar 2025', to: '25 Mar 2025', type: 'Sick Leave', days: '1', status: 'Approved', applied: '24 Mar 2025', remarks: 'Health issue' },
+                ].filter(row => activeTab === 'history' || row.status.toLowerCase() === activeTab).map((row, i) => (
+                  <tr key={i} className="hover:bg-slate-50/50 transition-colors">
+                    <td className="py-4 px-5 text-slate-600 whitespace-nowrap">{row.from}</td>
+                    <td className="py-4 px-5 text-slate-600 whitespace-nowrap">{row.to}</td>
+                    <td className="py-4 px-5 text-slate-600">{row.type}</td>
+                    <td className="py-4 px-5 text-slate-600">{row.days}</td>
+                    <td className="py-4 px-5">
+                      {row.status === 'Approved' ? (
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-green-100 text-green-700">
+                          Approved
+                        </span>
+                      ) : row.status === 'Pending' ? (
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-yellow-100 text-yellow-700">
+                          Pending
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-red-100 text-red-600">
+                          Rejected
+                        </span>
+                      )}
+                    </td>
+                    <td className="py-4 px-5 text-slate-600 whitespace-nowrap">{row.applied}</td>
+                    <td className="py-4 px-5 text-slate-600 truncate max-w-[150px]">{row.remarks}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
+
+        {/* Right Side: Calendar Component */}
+        <div className="w-full lg:w-[350px] bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex-shrink-0">
+          <h3 className="font-bold text-slate-900 mb-6 text-lg">Leave Calendar</h3>
+          
+          <div className="flex items-center justify-between mb-6">
+            <button className="p-1 hover:bg-slate-100 rounded text-slate-500 transition-colors">
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <span className="font-bold text-slate-900">Sep 2025</span>
+            <button className="p-1 hover:bg-slate-100 rounded text-slate-500 transition-colors">
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-7 gap-1 text-center text-sm mb-4">
+            {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
+              <div key={day} className="font-bold text-slate-800 py-2">{day}</div>
+            ))}
+            
+            {/* Calendar Grid (Hardcoded for Sep 2025 layout as per mockup) */}
+            {[
+              { day: '1',  type: '' }, { day: '2',  type: '' }, { day: '3',  type: '' }, { day: '4',  type: '' }, { day: '5',  type: '' }, { day: '6',  type: '' }, { day: '7',  type: '' },
+              { day: '8',  type: '' }, { day: '9',  type: '' }, { day: '10', type: '' }, { day: '11', type: '' }, { day: '12', type: '' }, { day: '13', type: '' }, { day: '14', type: '' },
+              { day: '15', type: 'approved' }, { day: '16', type: 'approved' }, { day: '17', type: '' }, { day: '18', type: '' }, { day: '19', type: '' }, { day: '20', type: '' }, { day: '21', type: '' },
+              { day: '22', type: '' }, { day: '23', type: '' }, { day: '24', type: '' }, { day: '25', type: '' }, { day: '26', type: '' }, { day: '27', type: '' }, { day: '28', type: '' },
+              { day: '29', type: '' }, { day: '30', type: '' }, { day: '',   type: '' }, { day: '',   type: '' }, { day: '',   type: '' }, { day: '',   type: '' }, { day: '',   type: '' }
+            ].map((d, i) => (
+              <div 
+                key={i} 
+                className={`
+                  h-10 flex items-center justify-center rounded-lg text-slate-700
+                  ${d.day ? 'hover:bg-slate-50 cursor-pointer transition-colors' : ''}
+                  ${d.type === 'approved' ? 'bg-green-100 text-green-800 font-bold' : ''}
+                `}
+              >
+                {d.day}
+              </div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 mt-8">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-sm bg-green-300 border border-green-400"></div>
+              <span className="text-xs text-slate-600">Approved Leave</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-sm bg-yellow-200 border border-yellow-300"></div>
+              <span className="text-xs text-slate-600">Pending Request</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-sm bg-red-300 border border-red-400"></div>
+              <span className="text-xs text-slate-600">Rejected Leave</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-sm bg-blue-300 border border-blue-400"></div>
+              <span className="text-xs text-slate-600">Today</span>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
-  );
-}
-
-function BalanceCard({ title, balance, total, color }: { title: string; balance: number; total: number; color: string }) {
-  return (
-    <div className="glass-card p-5 relative overflow-hidden group">
-      <div className={`absolute top-0 left-0 w-1 h-full bg-${color}`}></div>
-      <div className="flex justify-between items-start mb-4">
-        <h3 className="font-semibold text-slate-300">{title}</h3>
-        <Calendar className="w-5 h-5 text-slate-500" />
-      </div>
-      <div className="flex items-baseline gap-2">
-        <span className="text-3xl font-bold text-white">{balance}</span>
-        <span className="text-sm text-slate-500">/ {total} days</span>
-      </div>
-      
-      {/* Progress bar */}
-      <div className="w-full h-1.5 bg-wfm-dark rounded-full mt-4 overflow-hidden">
-        <div 
-          className={`h-full bg-${color} rounded-full transition-all duration-1000`} 
-          style={{ width: `${(balance/total)*100}%` }}
-        ></div>
-      </div>
-    </div>
-  );
-}
-
-function LeaveRow({ dates, type, duration, reason, reviewer, status }: { dates: string; type: string; duration: string; reason: string; reviewer: string; status: string }) {
-  const isApproved = status === 'Approved';
-  const isPending = status === 'Pending';
-  const isRejected = status === 'Rejected';
-  
-  return (
-    <tr className="hover:bg-white/[0.02] transition-colors">
-      <td className="p-4 font-medium text-white text-sm">{dates}</td>
-      <td className="p-4 text-sm text-slate-300">{type}</td>
-      <td className="p-4 text-sm text-slate-400">{duration}</td>
-      <td className="p-4 text-sm text-slate-400 truncate max-w-[200px]">{reason}</td>
-      <td className="p-4 text-sm text-slate-400">{reviewer}</td>
-      <td className="p-4 text-right">
-        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${
-          isApproved ? 'bg-success/10 text-success border-success/20' : 
-          isPending ? 'bg-warning/10 text-warning border-warning/20' : 
-          'bg-danger/10 text-danger border-danger/20'
-        }`}>
-          {isApproved && <CheckCircle2 className="w-3.5 h-3.5" />}
-          {isPending && <Clock className="w-3.5 h-3.5" />}
-          {isRejected && <XCircle className="w-3.5 h-3.5" />}
-          {status}
-        </span>
-      </td>
-    </tr>
   );
 }
